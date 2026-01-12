@@ -20,7 +20,7 @@
 
         <ElPopover placement="top" :width="600" trigger="click">
             <template #reference>
-                <ElButton class="mt-1" style="margin-top: 6px;">手动登录</ElButton>
+                <ElButton class="mt-1" style="margin-top: 6px;">下 载</ElButton>
             </template>
             <ElForm ref="formRef" :model="cookieForm" :rules="rules" label-width="100px" size="small">
                 <ElFormItem v-if="['home','zhcx','ckts'].includes(cookieForm.platform)" label="TpassToken" prop="tpassToken">
@@ -34,10 +34,10 @@
                 </ElFormItem>
                 <ElFormItem label="Platform" prop="platform">
                     <ElRadioGroup radio-group v-model="cookieForm.platform">
-                        <ElRadioButton label="home">新版首页</ElRadioButton>
-                        <ElRadioButton label="dppt">发票业务</ElRadioButton>
-                        <ElRadioButton label="zhcx">账户查询</ElRadioButton>
-                        <ElRadioButton label="ckts">退税管理</ElRadioButton>
+                        <ElRadioButton value="home">新版首页</ElRadioButton>
+                        <ElRadioButton value="dppt">发票业务</ElRadioButton>
+                        <ElRadioButton value="zhcx">账户查询</ElRadioButton>
+                        <ElRadioButton value="ckts">退税管理</ElRadioButton>
                     </ElRadioGroup>
                 </ElFormItem>
                 <ElFormItem>

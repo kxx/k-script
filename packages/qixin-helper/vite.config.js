@@ -17,7 +17,7 @@ export default defineConfig({
         description: '企信小助手',
         namespace: 'https://github.com/kxx/k-script',
         author: "kxx",
-        match: ['https://www.qixin.com/*'],
+        match: ['https://www.qixin.com','https://www.qixin.com/*','https://qixin.com','qixin.com','kxx.me'],
         connect: ['skynjweb.com'],
       },
       build: {

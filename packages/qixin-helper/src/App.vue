@@ -12,9 +12,9 @@ import Home from './views/Home.vue';
 <style scoped>
     .k-affix {
         position: fixed;
-        bottom: 15px;
+        bottom: 55px;
         padding-left: 15px;
         width: 36px;
-        z-index: 9999;
+        z-index: 99999;
     }
 </style>

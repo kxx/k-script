@@ -5,11 +5,6 @@
 
   <ElDrawer v-model="drawerVisible" :direction="direction" :with-header="false" size="50%" :append-to-body="true">
     <component ref="componentRef" :is="componentName"/>
-    <template #footer>
-      <div style="flex: auto">
-        <ElButton type="info" :icon="Switch" size="small" plain @click="changeMode">模式</ElButton>
-      </div>
-    </template>
   </ElDrawer>
 
   </template>
@@ -31,25 +26,11 @@ const componentRef = ref()
 const componentName = ref(null)
 
 onMounted(() => {
-    if (window.location.href.startsWith('https://tpass.') || window.location.href.startsWith('https://etax.')) {
-    componentName.value = markRaw(Account)
-  }else{
-    componentName.value = markRaw(Network)
-  }
+   componentName.value = markRaw(Account)
 })
 
 const showDrawer = () => {
     drawerVisible.value = true
 }
-
-//切换模式
-const changeMode = () => {
-    if (componentName.value == markRaw(Account)) {
-        componentName.value = markRaw(Network)
-    } else if (componentName.value == markRaw(Network)) {
-        componentName.value = markRaw(Account)
-    }
-}
-
 
 </script>
