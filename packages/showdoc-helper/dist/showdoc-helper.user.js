@@ -7,19 +7,17 @@
 // @license      MIT
 // @icon         https://img.alicdn.com/imgextra/i1/O1CN01JDQCi21Dc8EfbRwvF_!!6000000000236-73-tps-64-64.ico
 // @match        https://apidoc.chinackts.com/*
-// @require      https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js
+// @require      https://cdn.jsdelivr.net/npm/vue@3.5.26/dist/vue.global.prod.js
 // @require      data:application/javascript,window.Vue%3DVue%3B
-// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js
-// @require      https://cdn.bootcdn.net/ajax/libs/axios/1.3.4/axios.min.js
-// @require      https://cdn.jsdelivr.net/npm/element-plus@2.2.32/dist/index.full.min.js
-// @resource     element-plus/dist/index.css  https://cdn.bootcdn.net/ajax/libs/element-plus/2.2.32/index.min.css
+// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js
+// @require      https://cdn.bootcdn.net/ajax/libs/axios/1.13.2/axios.min.js
+// @require      https://cdn.jsdelivr.net/npm/element-plus@2.13.1/dist/index.full.min.js
+// @resource     element-plus/dist/index.css  https://cdn.bootcdn.net/ajax/libs/element-plus/2.13.1/index.min.css
 // @grant        GM_addStyle
 // @grant        GM_getResourceText
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .demo-form-inline .el-input {
-  --el-input-width: 220px;
-} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(" .demo-form-inline .el-input{--el-input-width: 220px} ");
 
 (function (vue, $, elementPlus, axios) {
   'use strict';
@@ -30,28 +28,22 @@
     __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
     return value;
   };
-  /*! Element Plus Icons Vue v2.0.6 */
-  var export_helper_default = (sfc, props) => {
-    let target = sfc.__vccOpts || sfc;
-    for (let [key, val] of props)
-      target[key] = val;
-    return target;
-  };
-  var _sfc_main226 = {
-    name: "Setting"
-  }, _hoisted_1226 = {
-    viewBox: "0 0 1024 1024",
-    xmlns: "http://www.w3.org/2000/svg"
-  }, _hoisted_2226 = /* @__PURE__ */ vue.createElementVNode("path", {
-    fill: "currentColor",
-    d: "M600.704 64a32 32 0 0 1 30.464 22.208l35.2 109.376c14.784 7.232 28.928 15.36 42.432 24.512l112.384-24.192a32 32 0 0 1 34.432 15.36L944.32 364.8a32 32 0 0 1-4.032 37.504l-77.12 85.12a357.12 357.12 0 0 1 0 49.024l77.12 85.248a32 32 0 0 1 4.032 37.504l-88.704 153.6a32 32 0 0 1-34.432 15.296L708.8 803.904c-13.44 9.088-27.648 17.28-42.368 24.512l-35.264 109.376A32 32 0 0 1 600.704 960H423.296a32 32 0 0 1-30.464-22.208L357.696 828.48a351.616 351.616 0 0 1-42.56-24.64l-112.32 24.256a32 32 0 0 1-34.432-15.36L79.68 659.2a32 32 0 0 1 4.032-37.504l77.12-85.248a357.12 357.12 0 0 1 0-48.896l-77.12-85.248A32 32 0 0 1 79.68 364.8l88.704-153.6a32 32 0 0 1 34.432-15.296l112.32 24.256c13.568-9.152 27.776-17.408 42.56-24.64l35.2-109.312A32 32 0 0 1 423.232 64H600.64zm-23.424 64H446.72l-36.352 113.088-24.512 11.968a294.113 294.113 0 0 0-34.816 20.096l-22.656 15.36-116.224-25.088-65.28 113.152 79.68 88.192-1.92 27.136a293.12 293.12 0 0 0 0 40.192l1.92 27.136-79.808 88.192 65.344 113.152 116.224-25.024 22.656 15.296a294.113 294.113 0 0 0 34.816 20.096l24.512 11.968L446.72 896h130.688l36.48-113.152 24.448-11.904a288.282 288.282 0 0 0 34.752-20.096l22.592-15.296 116.288 25.024 65.28-113.152-79.744-88.192 1.92-27.136a293.12 293.12 0 0 0 0-40.256l-1.92-27.136 79.808-88.128-65.344-113.152-116.288 24.96-22.592-15.232a287.616 287.616 0 0 0-34.752-20.096l-24.448-11.904L577.344 128zM512 320a192 192 0 1 1 0 384 192 192 0 0 1 0-384zm0 64a128 128 0 1 0 0 256 128 128 0 0 0 0-256z"
-  }, null, -1), _hoisted_3225 = [
-    _hoisted_2226
-  ];
-  function _sfc_render226(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1226, _hoisted_3225);
-  }
-  var setting_default = /* @__PURE__ */ export_helper_default(_sfc_main226, [["render", _sfc_render226], ["__file", "setting.vue"]]);
+  /*! Element Plus Icons Vue v2.3.2 */
+  var _sfc_main231 = /* @__PURE__ */ vue.defineComponent({
+    name: "Setting",
+    __name: "setting",
+    setup(__props) {
+      return (_ctx, _cache) => (vue.openBlock(), vue.createElementBlock("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 1024 1024"
+      }, [
+        vue.createElementVNode("path", {
+          fill: "currentColor",
+          d: "M600.704 64a32 32 0 0 1 30.464 22.208l35.2 109.376c14.784 7.232 28.928 15.36 42.432 24.512l112.384-24.192a32 32 0 0 1 34.432 15.36L944.32 364.8a32 32 0 0 1-4.032 37.504l-77.12 85.12a357 357 0 0 1 0 49.024l77.12 85.248a32 32 0 0 1 4.032 37.504l-88.704 153.6a32 32 0 0 1-34.432 15.296L708.8 803.904c-13.44 9.088-27.648 17.28-42.368 24.512l-35.264 109.376A32 32 0 0 1 600.704 960H423.296a32 32 0 0 1-30.464-22.208L357.696 828.48a352 352 0 0 1-42.56-24.64l-112.32 24.256a32 32 0 0 1-34.432-15.36L79.68 659.2a32 32 0 0 1 4.032-37.504l77.12-85.248a357 357 0 0 1 0-48.896l-77.12-85.248A32 32 0 0 1 79.68 364.8l88.704-153.6a32 32 0 0 1 34.432-15.296l112.32 24.256c13.568-9.152 27.776-17.408 42.56-24.64l35.2-109.312A32 32 0 0 1 423.232 64H600.64zm-23.424 64H446.72l-36.352 113.088-24.512 11.968a294 294 0 0 0-34.816 20.096l-22.656 15.36-116.224-25.088-65.28 113.152 79.68 88.192-1.92 27.136a293 293 0 0 0 0 40.192l1.92 27.136-79.808 88.192 65.344 113.152 116.224-25.024 22.656 15.296a294 294 0 0 0 34.816 20.096l24.512 11.968L446.72 896h130.688l36.48-113.152 24.448-11.904a288 288 0 0 0 34.752-20.096l22.592-15.296 116.288 25.024 65.28-113.152-79.744-88.192 1.92-27.136a293 293 0 0 0 0-40.256l-1.92-27.136 79.808-88.128-65.344-113.152-116.288 24.96-22.592-15.232a288 288 0 0 0-34.752-20.096l-24.448-11.904L577.344 128zM512 320a192 192 0 1 1 0 384 192 192 0 0 1 0-384m0 64a128 128 0 1 0 0 256 128 128 0 0 0 0-256"
+        })
+      ]));
+    }
+  }), setting_default = _sfc_main231;
   const cssLoader = (e) => {
     const t = GM_getResourceText(e);
     return GM_addStyle(t), t;
@@ -108,7 +100,7 @@
     }
   }
   const store = new Store();
-  const _Result = class {
+  const _Result = class _Result {
     constructor(type, msg, data) {
       __publicField(this, "type");
       __publicField(this, "msg");
@@ -155,11 +147,11 @@
       };
     }
   };
+  __publicField(_Result, "SUCCESS", "success");
+  __publicField(_Result, "WARNING", "warning");
+  __publicField(_Result, "ERROR", "error");
+  __publicField(_Result, "INFO", "info");
   let Result = _Result;
-  __publicField(Result, "SUCCESS", "success");
-  __publicField(Result, "WARNING", "warning");
-  __publicField(Result, "ERROR", "error");
-  __publicField(Result, "INFO", "info");
   const showdocService = {
     baseUrl: "https://apidoc.chinackts.com/server/index.php",
     async getAllItems(params) {
@@ -303,18 +295,18 @@
             vue.createVNode(vue.unref(elementPlus.ElFormItem), null, {
               default: vue.withCtx(() => [
                 vue.createVNode(vue.unref(elementPlus.ElButton), null, {
-                  default: vue.withCtx(() => [
-                    vue.createTextVNode("取消")
-                  ]),
+                  default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
+                    vue.createTextVNode("取消", -1)
+                  ])]),
                   _: 1
                 }),
                 vue.createVNode(vue.unref(elementPlus.ElButton), {
                   type: "primary",
                   onClick: saveConfig
                 }, {
-                  default: vue.withCtx(() => [
-                    vue.createTextVNode("确定")
-                  ]),
+                  default: vue.withCtx(() => [..._cache[4] || (_cache[4] = [
+                    vue.createTextVNode("确定", -1)
+                  ])]),
                   _: 1
                 })
               ]),
@@ -544,18 +536,18 @@
                     type: "primary",
                     onClick: handleFilter
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("查询")
-                    ]),
+                    default: vue.withCtx(() => [..._cache[2] || (_cache[2] = [
+                      vue.createTextVNode("查询", -1)
+                    ])]),
                     _: 1
                   }),
                   vue.createVNode(vue.unref(elementPlus.ElButton), {
                     type: "primary",
                     onClick: batchCreateDoc
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("批量创建")
-                    ]),
+                    default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
+                      vue.createTextVNode("批量创建", -1)
+                    ])]),
                     _: 1
                   })
                 ]),
@@ -629,9 +621,9 @@
                     size: "small",
                     text: ""
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("预览")
-                    ]),
+                    default: vue.withCtx(() => [..._cache[4] || (_cache[4] = [
+                      vue.createTextVNode("预览", -1)
+                    ])]),
                     _: 1
                   }),
                   vue.createVNode(vue.unref(elementPlus.ElButton), {
@@ -640,11 +632,11 @@
                     type: "danger",
                     onClick: vue.withModifiers(($event) => createDoc(scope.row), ["prevent"])
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("创建")
-                    ]),
-                    _: 2
-                  }, 1032, ["onClick"])
+                    default: vue.withCtx(() => [..._cache[5] || (_cache[5] = [
+                      vue.createTextVNode("创建", -1)
+                    ])]),
+                    _: 1
+                  }, 8, ["onClick"])
                 ]),
                 _: 1
               })

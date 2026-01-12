@@ -7,94 +7,61 @@
 // @license      MIT
 // @match        https://*.chinatax.gov.cn/*
 // @match        https://*.chinatax.gov.cn:8443/*
-// @require      https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js
+// @require      https://cdn.jsdelivr.net/npm/vue@3.5.26/dist/vue.global.prod.js
 // @require      data:application/javascript,window.Vue%3DVue%3B
-// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.3/jquery.min.js
-// @require      https://cdn.jsdelivr.net/npm/element-plus@2.2.32/dist/index.full.min.js
-// @resource     element-plus/dist/index.css  https://cdn.bootcdn.net/ajax/libs/element-plus/2.2.32/index.min.css
+// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js
+// @require      https://cdn.jsdelivr.net/npm/element-plus@2.13.1/dist/index.full.min.js
+// @resource     element-plus/dist/index.css  https://cdn.bootcdn.net/ajax/libs/element-plus/2.13.1/index.min.css
 // @connect      skynjweb.com
-// @grant        GM_addStyle
+// @grant        GM_cookie
 // @grant        GM_getResourceText
 // @grant        GM_openInTab
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
-(n=>{if(typeof GM_addStyle=="function"){GM_addStyle(n);return}const e=document.createElement("style");e.textContent=n,document.head.append(e)})(` .table-container[data-v-35b354ff] {\r
-display: flex;\r
-flex-direction: column;\r
-height: 100%;
-}\r
+(a=>{const e=document.createElement("style");e.dataset.source="vite-plugin-monkey",e.innerText=a,document.head.appendChild(e)})(" .table-container[data-v-35b354ff],.table-container[data-v-27edb2cf]{display:flex;flex-direction:column;height:100%}.viewDialog span[data-v-27edb2cf]{word-break:normal;width:auto;display:block;white-space:pre-wrap;word-wrap:break-word;overflow:hidden}.k-affix[data-v-c4fbe543]{position:fixed;bottom:15px;padding-left:15px;width:36px;z-index:9999} ");
 
-.table-container[data-v-27edb2cf] {\r
-    display: flex;\r
-    flex-direction: column;\r
-    height: 100%;
-}
-.viewDialog span[data-v-27edb2cf] {\r
-    word-break: normal;\r
-    width: auto;\r
-    display: block;\r
-    white-space: pre-wrap;\r
-    word-wrap: break-word;\r
-    overflow: hidden;
-}\r
-
-.k-affix[data-v-58210dee] {
-        position: fixed;
-        bottom: 15px;
-        padding-left: 15px;
-        width: 36px;
-        z-index: 9999;
-} `);
-
-(function (vue, jquery, elementPlus) {
-  'use strict';
-
-  /*! Element Plus Icons Vue v2.0.6 */
-  var export_helper_default = (sfc, props) => {
-    let target = sfc.__vccOpts || sfc;
-    for (let [key, val] of props)
-      target[key] = val;
-    return target;
-  };
-  var _sfc_main205 = {
-    name: "Promotion"
-  }, _hoisted_1205 = {
-    viewBox: "0 0 1024 1024",
-    xmlns: "http://www.w3.org/2000/svg"
-  }, _hoisted_2205 = /* @__PURE__ */ vue.createElementVNode("path", {
-    fill: "currentColor",
-    d: "m64 448 832-320-128 704-446.08-243.328L832 192 242.816 545.472 64 448zm256 512V657.024L512 768 320 960z"
-  }, null, -1), _hoisted_3204 = [
-    _hoisted_2205
-  ];
-  function _sfc_render205(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1205, _hoisted_3204);
-  }
-  var promotion_default = /* @__PURE__ */ export_helper_default(_sfc_main205, [["render", _sfc_render205], ["__file", "promotion.vue"]]);
-  var _sfc_main250 = {
-    name: "Switch"
-  }, _hoisted_1250 = {
-    viewBox: "0 0 1024 1024",
-    xmlns: "http://www.w3.org/2000/svg"
-  }, _hoisted_2250 = /* @__PURE__ */ vue.createElementVNode("path", {
-    fill: "currentColor",
-    d: "M118.656 438.656a32 32 0 0 1 0-45.248L416 96l4.48-3.776A32 32 0 0 1 461.248 96l3.712 4.48a32.064 32.064 0 0 1-3.712 40.832L218.56 384H928a32 32 0 1 1 0 64H141.248a32 32 0 0 1-22.592-9.344zM64 608a32 32 0 0 1 32-32h786.752a32 32 0 0 1 22.656 54.592L608 928l-4.48 3.776a32.064 32.064 0 0 1-40.832-49.024L805.632 640H96a32 32 0 0 1-32-32z"
-  }, null, -1), _hoisted_3249 = [
-    _hoisted_2250
-  ];
-  function _sfc_render250(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock("svg", _hoisted_1250, _hoisted_3249);
-  }
-  var switch_default = /* @__PURE__ */ export_helper_default(_sfc_main250, [["render", _sfc_render250], ["__file", "switch.vue"]]);
+(function(vue, jquery, elementPlus) {
+  "use strict";
+  /*! Element Plus Icons Vue v2.3.2 */
+  var _sfc_main209 = /* @__PURE__ */ vue.defineComponent({
+    name: "Promotion",
+    __name: "promotion",
+    setup(__props) {
+      return (_ctx, _cache) => (vue.openBlock(), vue.createElementBlock("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 1024 1024"
+      }, [
+        vue.createElementVNode("path", {
+          fill: "currentColor",
+          d: "m64 448 832-320-128 704-446.08-243.328L832 192 242.816 545.472zm256 512V657.024L512 768z"
+        })
+      ]));
+    }
+  }), promotion_default = _sfc_main209;
+  var _sfc_main258 = /* @__PURE__ */ vue.defineComponent({
+    name: "Switch",
+    __name: "switch",
+    setup(__props) {
+      return (_ctx, _cache) => (vue.openBlock(), vue.createElementBlock("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 1024 1024"
+      }, [
+        vue.createElementVNode("path", {
+          fill: "currentColor",
+          d: "M118.656 438.656a32 32 0 0 1 0-45.248L416 96l4.48-3.776A32 32 0 0 1 461.248 96l3.712 4.48a32.064 32.064 0 0 1-3.712 40.832L218.56 384H928a32 32 0 1 1 0 64H141.248a32 32 0 0 1-22.592-9.344M64 608a32 32 0 0 1 32-32h786.752a32 32 0 0 1 22.656 54.592L608 928l-4.48 3.776a32.064 32.064 0 0 1-40.832-49.024L805.632 640H96a32 32 0 0 1-32-32"
+        })
+      ]));
+    }
+  }), switch_default = _sfc_main258;
   const cssLoader = (e) => {
-    const t = GM_getResourceText(e);
-    return GM_addStyle(t), t;
+    const t = GM_getResourceText(e), o = document.createElement("style");
+    return o.innerText = t, document.head.append(o), t;
   };
   cssLoader("element-plus/dist/index.css");
-  var _GM_openInTab = /* @__PURE__ */ (() => typeof GM_openInTab != "undefined" ? GM_openInTab : void 0)();
-  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
-  var _monkeyWindow = /* @__PURE__ */ (() => window)();
+  var monkeyWindow = window;
+  var GM_openInTab = /* @__PURE__ */ (() => monkeyWindow.GM_openInTab)();
+  var GM_xmlhttpRequest = /* @__PURE__ */ (() => monkeyWindow.GM_xmlhttpRequest)();
   class Store {
     constructor() {
       this.prefix = "etax_helper_";
@@ -142,7 +109,7 @@ height: 100%;
     baseUrl: "https://skynjweb.com:7443/dppt/ac-api/support",
     async getAccount(params) {
       return new Promise((resolve, reject) => {
-        _GM_xmlhttpRequest({
+        GM_xmlhttpRequest({
           method: "POST",
           url: `${this.baseUrl}/getAccount`,
           headers: {
@@ -161,7 +128,7 @@ height: 100%;
     },
     async getCookie(params) {
       return new Promise((resolve, reject) => {
-        _GM_xmlhttpRequest({
+        GM_xmlhttpRequest({
           method: "POST",
           url: `${this.baseUrl}/getCookie`,
           headers: {
@@ -180,7 +147,7 @@ height: 100%;
     },
     async decryptJmbw(params) {
       return new Promise((resolve, reject) => {
-        _GM_xmlhttpRequest({
+        GM_xmlhttpRequest({
           method: "POST",
           url: `${this.baseUrl}/decryptJmbw`,
           headers: {
@@ -229,6 +196,7 @@ height: 100%;
     document.cookie = cookieText;
     console.log("Cookie set successfully : " + name);
   };
+  const Account_vue_vue_type_style_index_0_scoped_35b354ff_lang = "";
   const _export_sfc = (sfc, props) => {
     const target = sfc.__vccOpts || sfc;
     for (const [key, val] of props) {
@@ -310,11 +278,11 @@ height: 100%;
       }
       const openEtaxPage = (ptdm) => {
         let url = "https://etax." + areaName.value + ".chinatax.gov.cn:8443/loginb/";
-        _GM_openInTab(url, { active: true });
+        GM_openInTab(url, { active: true });
       };
       const openDpptPage = (ptdm) => {
         let url = "https://dppt." + areaName.value + ".chinatax.gov.cn:8443/invoice-business";
-        _GM_openInTab(url, { active: true });
+        GM_openInTab(url, { active: true });
       };
       return (_ctx, _cache) => {
         return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$3, [
@@ -359,9 +327,9 @@ height: 100%;
                     size: "small",
                     text: ""
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("校验")
-                    ]),
+                    default: vue.withCtx(() => [..._cache[5] || (_cache[5] = [
+                      vue.createTextVNode("校验", -1)
+                    ])]),
                     _: 1
                   }),
                   vue.createVNode(vue.unref(elementPlus.ElButton), {
@@ -370,33 +338,33 @@ height: 100%;
                     type: "danger",
                     onClick: vue.withModifiers(($event) => handleAuth(scope.row), ["prevent"])
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("DTA")
-                    ]),
-                    _: 2
-                  }, 1032, ["onClick"]),
+                    default: vue.withCtx(() => [..._cache[6] || (_cache[6] = [
+                      vue.createTextVNode("DTA", -1)
+                    ])]),
+                    _: 1
+                  }, 8, ["onClick"]),
                   vue.createVNode(vue.unref(elementPlus.ElButton), {
                     size: "small",
                     text: "",
                     type: "danger",
                     onClick: vue.withModifiers(($event) => handleAuth(scope.row), ["prevent"])
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("BIM")
-                    ]),
-                    _: 2
-                  }, 1032, ["onClick"]),
+                    default: vue.withCtx(() => [..._cache[7] || (_cache[7] = [
+                      vue.createTextVNode("BIM", -1)
+                    ])]),
+                    _: 1
+                  }, 8, ["onClick"]),
                   vue.createVNode(vue.unref(elementPlus.ElButton), {
                     size: "small",
                     text: "",
                     type: "danger",
                     onClick: vue.withModifiers(($event) => handleAuth(scope.row), ["prevent"])
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("RIM")
-                    ]),
-                    _: 2
-                  }, 1032, ["onClick"])
+                    default: vue.withCtx(() => [..._cache[8] || (_cache[8] = [
+                      vue.createTextVNode("RIM", -1)
+                    ])]),
+                    _: 1
+                  }, 8, ["onClick"])
                 ]),
                 _: 1
               })
@@ -413,9 +381,9 @@ height: 100%;
                 class: "mt-1",
                 style: { "margin-top": "6px" }
               }, {
-                default: vue.withCtx(() => [
-                  vue.createTextVNode("手动登录")
-                ]),
+                default: vue.withCtx(() => [..._cache[9] || (_cache[9] = [
+                  vue.createTextVNode("手动登录", -1)
+                ])]),
                 _: 1
               })
             ]),
@@ -480,27 +448,27 @@ height: 100%;
                       }, {
                         default: vue.withCtx(() => [
                           vue.createVNode(vue.unref(elementPlus.ElRadioButton), { label: "home" }, {
-                            default: vue.withCtx(() => [
-                              vue.createTextVNode("新版首页")
-                            ]),
+                            default: vue.withCtx(() => [..._cache[10] || (_cache[10] = [
+                              vue.createTextVNode("新版首页", -1)
+                            ])]),
                             _: 1
                           }),
                           vue.createVNode(vue.unref(elementPlus.ElRadioButton), { label: "dppt" }, {
-                            default: vue.withCtx(() => [
-                              vue.createTextVNode("发票业务")
-                            ]),
+                            default: vue.withCtx(() => [..._cache[11] || (_cache[11] = [
+                              vue.createTextVNode("发票业务", -1)
+                            ])]),
                             _: 1
                           }),
                           vue.createVNode(vue.unref(elementPlus.ElRadioButton), { label: "zhcx" }, {
-                            default: vue.withCtx(() => [
-                              vue.createTextVNode("账户查询")
-                            ]),
+                            default: vue.withCtx(() => [..._cache[12] || (_cache[12] = [
+                              vue.createTextVNode("账户查询", -1)
+                            ])]),
                             _: 1
                           }),
                           vue.createVNode(vue.unref(elementPlus.ElRadioButton), { label: "ckts" }, {
-                            default: vue.withCtx(() => [
-                              vue.createTextVNode("退税管理")
-                            ]),
+                            default: vue.withCtx(() => [..._cache[13] || (_cache[13] = [
+                              vue.createTextVNode("退税管理", -1)
+                            ])]),
                             _: 1
                           })
                         ]),
@@ -515,15 +483,15 @@ height: 100%;
                         type: "primary",
                         onClick: onSubmit
                       }, {
-                        default: vue.withCtx(() => [
-                          vue.createTextVNode("确定")
-                        ]),
+                        default: vue.withCtx(() => [..._cache[14] || (_cache[14] = [
+                          vue.createTextVNode("确定", -1)
+                        ])]),
                         _: 1
                       }),
                       vue.createVNode(vue.unref(elementPlus.ElButton), { onClick: resetForm }, {
-                        default: vue.withCtx(() => [
-                          vue.createTextVNode("重置")
-                        ]),
+                        default: vue.withCtx(() => [..._cache[15] || (_cache[15] = [
+                          vue.createTextVNode("重置", -1)
+                        ])]),
                         _: 1
                       })
                     ]),
@@ -555,6 +523,7 @@ height: 100%;
       duration: timeout || 3e3
     });
   };
+  const Network_vue_vue_type_style_index_0_scoped_27edb2cf_lang = "";
   const _hoisted_1$2 = { class: "table-container" };
   const _sfc_main$2 = {
     __name: "Network",
@@ -569,10 +538,10 @@ height: 100%;
         dzfpSsotoken.value = store.getCookie("dzfp-ssotoken");
       });
       function xhrListener() {
-        _monkeyWindow.m_log = _monkeyWindow.console.log;
-        _monkeyWindow.m_log("开启请求监听");
-        const originalXhrOpen = _monkeyWindow.XMLHttpRequest.prototype.open;
-        _monkeyWindow.XMLHttpRequest.prototype.open = function(method, url) {
+        monkeyWindow.m_log = monkeyWindow.console.log;
+        monkeyWindow.m_log("开启请求监听");
+        const originalXhrOpen = monkeyWindow.XMLHttpRequest.prototype.open;
+        monkeyWindow.XMLHttpRequest.prototype.open = function(method, url) {
           const xhr = this;
           const originalXhrSend = xhr.send;
           xhr.send = function(data) {
@@ -580,7 +549,7 @@ height: 100%;
               method,
               url,
               data,
-              date: new Date().toLocaleTimeString()
+              date: (/* @__PURE__ */ new Date()).toLocaleTimeString()
             };
             xhr.addEventListener("load", function() {
               const responseData = {
@@ -680,22 +649,22 @@ height: 100%;
                     size: "small",
                     onClick: ($event) => viewRequest(scope.row)
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("参数")
-                    ]),
-                    _: 2
-                  }, 1032, ["onClick"]),
+                    default: vue.withCtx(() => [..._cache[1] || (_cache[1] = [
+                      vue.createTextVNode("参数", -1)
+                    ])]),
+                    _: 1
+                  }, 8, ["onClick"]),
                   vue.createVNode(vue.unref(elementPlus.ElButton), {
                     link: "",
                     type: "primary",
                     size: "small",
                     onClick: ($event) => viewResponse(scope.row)
                   }, {
-                    default: vue.withCtx(() => [
-                      vue.createTextVNode("响应")
-                    ]),
-                    _: 2
-                  }, 1032, ["onClick"])
+                    default: vue.withCtx(() => [..._cache[2] || (_cache[2] = [
+                      vue.createTextVNode("响应", -1)
+                    ])]),
+                    _: 1
+                  }, 8, ["onClick"])
                 ]),
                 _: 1
               })
@@ -707,9 +676,9 @@ height: 100%;
             style: { "margin-top": "6px" },
             onClick: handleClear
           }, {
-            default: vue.withCtx(() => [
-              vue.createTextVNode("清空")
-            ]),
+            default: vue.withCtx(() => [..._cache[3] || (_cache[3] = [
+              vue.createTextVNode("清空", -1)
+            ])]),
             _: 1
           }),
           vue.createVNode(vue.unref(elementPlus.ElDialog), {
@@ -788,9 +757,9 @@ height: 100%;
                   plain: "",
                   onClick: changeMode
                 }, {
-                  default: vue.withCtx(() => [
-                    vue.createTextVNode("模式")
-                  ]),
+                  default: vue.withCtx(() => [..._cache[1] || (_cache[1] = [
+                    vue.createTextVNode("模式", -1)
+                  ])]),
                   _: 1
                 }, 8, ["icon"])
               ])
@@ -807,6 +776,7 @@ height: 100%;
       };
     }
   };
+  const App_vue_vue_type_style_index_0_scoped_c4fbe543_lang = "";
   const _hoisted_1 = { class: "k-affix" };
   const _sfc_main = {
     __name: "App",
@@ -818,7 +788,7 @@ height: 100%;
       };
     }
   };
-  const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-58210dee"]]);
+  const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-c4fbe543"]]);
   vue.createApp(App).mount(
     (() => {
       const app = document.createElement("div");
@@ -827,5 +797,4 @@ height: 100%;
       return app;
     })()
   );
-
 })(Vue, $, ElementPlus);
