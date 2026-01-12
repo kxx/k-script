@@ -1,6 +1,7 @@
 {
   "name": "k-script",
   "private": true,
+  "workspaces": ["packages/*"],
   "scripts": {
     "etax-helper:dev": "pnpm -r --filter=./packages/etax-helper dev",
     "qixin-helper:dev": "pnpm -r --filter=./packages/qixin-helper dev",
