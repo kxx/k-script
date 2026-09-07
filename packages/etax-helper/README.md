@@ -1,6 +1,6 @@
 # ETax 助手
 
-基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.5**。
+基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.6**。
 
 [安装或更新脚本](https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js)
 
@@ -30,7 +30,7 @@ Vue 3、按需引用的 Element Plus 组件及图标均内置于脚本，没有 
 
 ## 开发与验证
 
-在仓库根目录使用 **Node.js 22、pnpm 9.15.9**（`packageManager` 固定版本），以 `pnpm-lock.yaml` 为依赖依据：
+在仓库根目录使用 **Node.js 22.20+（22.x）或 24.12+、pnpm 9.15.9**（`packageManager` 固定版本），以 `pnpm-lock.yaml` 为依赖依据：
 
 ```bash
 pnpm install --frozen-lockfile
@@ -95,3 +95,24 @@ pnpm --filter etax-helper test:browser
 浏览器测试通过真实响应头施加不含 unsafe-eval 的 CSP，GM API 仅为 userscript 局部绑定。覆盖正常启动、配置读取失败、XHR/Fetch 单独及同时失败、恢复后重复重试、诊断脱敏、主系统 Vue 2/Element UI 共存、宿主移除及 body 重绘。CI 同步执行该测试。它模拟脚本管理器的注入行为，不能替代真实 Tampermonkey 和各省电局现场验收。
 
 已确认可用基线为提交 `1c276fbdc8933085afd99978cf3b8a584929c352`（1.2.3）。可从[基线提交](https://github.com/kxx/k-script/tree/1c276fbdc8933085afd99978cf3b8a584929c352/packages/etax-helper)获取源码和安装脚本。GitHub Actions 创建标签被权限限制拒绝（403），因此暂未创建远程标签；回退以该固定提交为准。详细发布记录见 [CHANGELOG.md](CHANGELOG.md)。
+
+## 构建工具链（1.2.6）
+
+`etax-helper` 显式声明自己的运行时与开发依赖，构建不再依靠根包提供 Vite 或 Vue 插件。固定版本：
+
+| 分类 | 依赖 | 版本 |
+|---|---|---|
+| 构建 | Vite | 8.2.2 |
+| 构建 | @vitejs/plugin-vue | 6.0.8 |
+| 构建 | vite-plugin-monkey | 8.1.1 |
+| 运行时 | Vue | 3.5.26（保持原版） |
+| 运行时 | Element Plus | 2.13.1（保持原版） |
+| 运行时 | @element-plus/icons-vue | 2.3.2（保持原版） |
+
+Vite 8 使用 Rolldown/Oxc；移除旧 `minify: 'esbuild'` 设置，使用其原生压缩器。显式保留 Vite 4 的 JavaScript 编译目标，避免默认目标变化导致额外抬高语法要求；这不代表已验证这些旧浏览器的所有 Web API。CSP 的 lodash 全局对象修复、GM 局部绑定、Shadow DOM 及安装地址继续保留。
+
+Node 版本约束适用于开发/CI，不要求安装脚本的用户安装 Node。CI 在 Node 22 和 24 分别执行核心测试、构建、产物一致性和浏览器回归。根包旧依赖仍供 qixin-helper / showdoc-helper 使用，为其他两包补充显式 Vite 4.5.14 声明，防止 pnpm 将它们的插件 peer dependency 自动绑定到本包的 Vite 8，本次不升级其他脚本工具链；Vue 2 / Element UI 仅用作浏览器测试中的模拟主系统。
+
+参考：[Vite 8 迁移说明](https://vite.dev/guide/migration)、[油猴构建插件](https://github.com/lisonge/vite-plugin-monkey)。
+
+本轮稳定基线：[已验收的 1.2.5](https://github.com/kxx/k-script/tree/7f0fd296a6ee124e2c31548cd69dbe0c2ac52de7/packages/etax-helper)。后续按独立版本推进配置迁移规则与业务逻辑整理、请求排查效率、发布流程完善，避免把这些功能变化混入工具链升级。

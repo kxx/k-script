@@ -5,9 +5,10 @@ import vue from '@vitejs/plugin-vue';
 import monkey from 'vite-plugin-monkey';
 
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
-  build: { minify: 'esbuild' },
+  // Preserve Vite 4's emitted syntax targets while upgrading the bundler.
+  build: { target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'], minify: true },
   define: { __ETAX_VERSION__: JSON.stringify(version) },
   assetsInclude: ['**/*.html'],
   plugins: [

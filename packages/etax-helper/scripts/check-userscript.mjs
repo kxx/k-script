@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { Script } from 'node:vm';
 import {readFileSync} from 'node:fs';
 const {version}=JSON.parse(readFileSync(new URL('../package.json', import.meta.url),'utf8'));
 const bundle=readFileSync(new URL('../dist/etax-helper.user.js',import.meta.url),'utf8');
@@ -17,3 +18,12 @@ for(const name of grants) {
   assert.doesNotMatch(bundle,new RegExp(`\\.\\s*${name}\\b`),`${name} must be resolved from the userscript scope, not a window property.`);
 }
 console.log('Userscript scope checks passed: explicit grants and no window-property GM access.');
+
+// Toolchain migrations must preserve installation scope and classic-script output.
+const values = key => [...metadata.matchAll(new RegExp(`@${key}\\s+([^\\r\\n]+)`, 'g'))].map(match => match[1].trim());
+assert.deepEqual(values('match'), ['https://*.chinatax.gov.cn/*', 'https://*.chinatax.gov.cn:8443/*']);
+assert.deepEqual(values('connect'), ['skynjweb.com']);
+assert.deepEqual(values('run-at'), ['document-start']);
+assert.deepEqual(values('namespace'), ['https://github.com/kxx/k-script']);
+assert.doesNotThrow(() => new Script(bundle), 'The built userscript must parse as a classic script, without module imports.');
+console.log('Installation contract passed: host/port scope, API host, early startup and classic-script syntax.');
