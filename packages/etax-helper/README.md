@@ -94,4 +94,4 @@ pnpm --filter etax-helper test:browser
 
 浏览器测试通过真实响应头施加不含 unsafe-eval 的 CSP，GM API 仅为 userscript 局部绑定。覆盖正常启动、配置读取失败、XHR/Fetch 单独及同时失败、恢复后重复重试、诊断脱敏、主系统 Vue 2/Element UI 共存、宿主移除及 body 重绘。CI 同步执行该测试。它模拟脚本管理器的注入行为，不能替代真实 Tampermonkey 和各省电局现场验收。
 
-已确认可用基线为提交 `1c276fbdc8933085afd99978cf3b8a584929c352`（1.2.3）。主分支检查通过后，CI 创建固定标签 `etax-helper-v1.2.3`；已有标签绝不覆盖。详细发布记录见 [CHANGELOG.md](CHANGELOG.md)。
+已确认可用基线为提交 `1c276fbdc8933085afd99978cf3b8a584929c352`（1.2.3）。可从[基线提交](https://github.com/kxx/k-script/tree/1c276fbdc8933085afd99978cf3b8a584929c352/packages/etax-helper)获取源码和安装脚本。GitHub Actions 创建标签被权限限制拒绝（403），因此暂未创建远程标签；回退以该固定提交为准。详细发布记录见 [CHANGELOG.md](CHANGELOG.md)。

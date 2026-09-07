@@ -26,23 +26,3 @@ jobs:
         run: pnpm --filter etax-helper exec playwright install --with-deps chromium
       - name: Test generated userscript in browser
         run: pnpm --filter etax-helper test:browser
-  baseline:
-    needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Preserve confirmed working 1.2.3 baseline
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const ref = 'tags/etax-helper-v1.2.3';
-            const sha = '1c276fbdc8933085afd99978cf3b8a584929c352';
-            try {
-              const existing = await github.rest.git.getRef({...context.repo, ref});
-              if (existing.data.object.sha !== sha) core.setFailed('Baseline tag points to a different commit; refusing to overwrite it.');
-            } catch (error) {
-              if (error.status !== 404) throw error;
-              await github.rest.git.createRef({...context.repo, ref: `refs/${ref}`, sha});
-            }
