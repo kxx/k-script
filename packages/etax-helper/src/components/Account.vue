@@ -28,7 +28,7 @@
 </template>
 <script setup>
 import { Search, Refresh, User, ArrowLeft } from '@element-plus/icons-vue';
-import { GM_openInTab } from '$';
+import { openInTab } from '../core/userscript';
 import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue';
 import { ElAlert, ElInput, ElButton, ElTable, ElTableColumn, ElForm, ElFormItem, ElRadioGroup, ElRadioButton } from 'element-plus';
 import { config } from '../stores/config';
@@ -62,7 +62,7 @@ function login() {
   try {
     const url = getPlatformUrl(area, form.platform);
     writeLoginCookies(form, {document, clientId: localStorage.getItem('clientId') || ''});
-    if (config.newTab) GM_openInTab(url, {active: true}); else location.assign(url);
+    if (config.newTab) openInTab(url, {active: true}); else location.assign(url);
     reset(); loginMessage.value = 'Cookie 已写入并通过读取检查。登录是否有效，请以目标页面结果为准。';
   } catch (e) { showError(e.message); } finally { submitting.value = false; }
 }

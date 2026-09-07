@@ -1,6 +1,6 @@
 # ETax 助手
 
-基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.2**。
+基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.3**。
 
 [安装或更新脚本](https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js)
 
@@ -69,3 +69,9 @@ pnpm etax-helper:build
 纸飞机宿主位于 documentElement，主页面重绘 body 不会删除入口；宿主被直接移除时复用现有实例恢复，不重新安装请求监听。
 
 脚本头显式声明固定 updateURL 和 downloadURL。旧安装如果没有有效更新地址，需要从 README 安装链接覆盖更新一次；不要先删除脚本，以免丢失配置。安装后刷新税局页面，并确认油猴中的版本为 1.2.2。如果仍未出现，检查当前域名是否命中脚本规则、脚本是否启用，以及控制台首条脚本错误。
+
+## 油猴作用域兼容（1.2.3）
+
+现场 `x0 is not a function` 对应旧产物中的 `window.GM_getValue`。本版通过 `src/core/userscript.js` 直接访问油猴注入的作用域绑定，不再使用构建插件 `$` 导出的 window.GM_* 访问路径。全部 API 显式声明权限，并由构建检查防止退回旧实现。
+
+验证包含：GM API 仅为局部绑定且 window 上完全没有对应属性；旧版复现同一报错，新版纸飞机、配置读写、账户请求、登录开页、解密及复制均可用。GM 存储接口异常时保留入口，并在设置页显示错误，不会自动覆盖或删除无法读取的持久配置。

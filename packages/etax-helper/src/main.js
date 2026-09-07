@@ -1,5 +1,5 @@
 import { createApp, shallowRef, ref } from 'vue';
-import { unsafeWindow } from '$';
+import { getPageWindow } from './core/userscript';
 import App from './App.vue';
 import helperCss from './style.css?inline';
 import elementCss from 'element-plus/dist/index.css?inline';
@@ -7,7 +7,7 @@ import { installNetwork } from './core/network';
 import { parseCookies } from './core/cookies';
 import { setNoticeContainer } from './utils/notice';
 // Install before mounting the panel; DOM readiness does not delay collection.
-const collector = installNetwork(unsafeWindow, { getToken: () => parseCookies(document.cookie)['dzfp-ssotoken'] || '' });
+const collector = installNetwork(getPageWindow(), { getToken: () => parseCookies(document.cookie)['dzfp-ssotoken'] || '' });
 function mount() {
   if (document.getElementById('etax-helper')) return;
   const host = document.createElement('div'); host.id = 'etax-helper';

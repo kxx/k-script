@@ -1,7 +1,7 @@
-import { GM_xmlhttpRequest } from '$';
+import { xmlHttpRequest } from '../core/userscript';
 import { config } from '../stores/config';
 import { createRequest } from './request';
-const request = createRequest(GM_xmlhttpRequest, () => config);
+const request = createRequest(xmlHttpRequest, () => config);
 export default {
   getAccount: params => request('getAccount', params),
   getCookie: cookieId => request('getCookie', cookieId),

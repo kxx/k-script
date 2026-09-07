@@ -31,6 +31,8 @@ export default defineConfig({
         updateURL: 'https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js',
         downloadURL: 'https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js',
         'run-at': 'document-start',
+        // Explicit grants accompany the direct userscript-scope API adapter.
+        grant: ['GM_getValue', 'GM_setValue', 'GM_openInTab', 'GM_xmlhttpRequest', 'GM_setClipboard', 'unsafeWindow'],
         license: 'MIT',
         description: 'etax小助手',
         namespace: 'https://github.com/kxx/k-script',

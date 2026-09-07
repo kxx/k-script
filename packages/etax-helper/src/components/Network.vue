@@ -24,7 +24,7 @@ import { computed, inject, onBeforeUnmount, ref, shallowRef, toRaw } from 'vue';
 import { ElTable, ElTableColumn, ElButton, ElInput, ElSelect, ElOption, ElAlert } from 'element-plus';
 import { Search, VideoPause, VideoPlay, Delete, ArrowLeft, CopyDocument } from '@element-plus/icons-vue';
 import { highlightJson } from '../utils/highlight';
-import { GM_setClipboard } from '$';
+import { setClipboard } from '../core/userscript';
 import support from '../services/support';
 import { format, redact } from '../utils/format';
 import { showSuccess, showError } from '../utils/notice';
@@ -53,6 +53,6 @@ async function decrypt() {
     }
   } catch (e) { if (current === revision && visible.value) error.value = e.message; } finally { if (current === revision) decrypting.value = false; }
 }
-function copy() { try { GM_setClipboard(redact(content.value)); showSuccess('已复制，常见敏感字段已脱敏'); } catch { showError('复制失败，请检查剪贴板权限'); } }
+function copy() { try { setClipboard(redact(content.value)); showSuccess('已复制，常见敏感字段已脱敏'); } catch { showError('复制失败，请检查剪贴板权限'); } }
 onBeforeUnmount(invalidate);
 </script>
