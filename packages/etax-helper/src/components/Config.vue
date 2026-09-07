@@ -22,5 +22,5 @@ import {showSuccess,showError} from '../utils/notice';
 defineEmits(['back']);
 const form=reactive({apiKey:config.apiKey,newTab:config.newTab,width:config.width});
 function syncForm(){Object.assign(form,{apiKey:config.apiKey,newTab:config.newTab,width:config.width});}
-function save(){try{saveConfig({...form,apiKey:form.apiKey.trim(),width:form.width||720});showSuccess('设置已保存');}catch{showError('设置保存失败，请检查脚本管理器权限');}}
+function save(){try{saveConfig({...form,apiKey:form.apiKey.trim(),width:form.width||720});showSuccess('设置已保存');}catch{showError(storageWarning.value || '设置保存失败，请重试');}}
 </script>

@@ -28,43 +28,14 @@
 </template>
 <script setup>
 import { Search, Refresh, User, ArrowLeft } from '@element-plus/icons-vue';
-import { openInTab } from '../core/userscript';
-import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue';
+import { ref } from 'vue';
 import { ElAlert, ElInput, ElButton, ElTable, ElTableColumn, ElForm, ElFormItem, ElRadioGroup, ElRadioButton } from 'element-plus';
 import { config } from '../stores/config';
-import support from '../services/support';
-import { getRegion, getPlatformUrl, platforms } from '../config/platforms';
-import { writeLoginCookies } from '../core/cookies';
-import { showError } from '../utils/notice';
+import { getRegion, platforms } from '../config/platforms';
+import { useAccounts } from '../composables/useAccounts';
+import { useManualLogin } from '../composables/useManualLogin';
 const emit = defineEmits(['settings']);
-const manual = ref(false);
-const area = getRegion(location.href), search = ref(''), rows = ref([]), loading = ref(false), error = ref(''), submitting = ref(false), loginMessage = ref('');
-const form = reactive({platform: 'home', tpassToken: '', checkToken: '', dzfpToken: ''});
-let active = true;
-onBeforeUnmount(() => { active = false; reset(); });
-const filtered = computed(() => rows.value.filter(row => [row.taxNo, row.company, row.cookieId].some(value => String(value ?? '').toLowerCase().includes(search.value.trim().toLowerCase()))));
-async function refresh() {
-  if (loading.value) return;
-  error.value = ''; rows.value = [];
-  if (!config.apiKey) return;
-  if (!area) { error.value = '无法识别地区，请在电局、Tpass 或发票平台页面查询账户'; return; }
-  loading.value = true;
-  try {
-    const data = await support.getAccount({areaName: area});
-    if (!Array.isArray(data?.workspaces)) throw new Error('账户数据格式不符合预期，请检查服务返回值');
-    if (active) rows.value = data.workspaces.map(row => ({...row, taxNo: row.nsrsbh ?? row.name ?? '', company: row.nsrmc ?? row.name2 ?? '', user: row.username ?? row.name3 ?? '', statusText: row.status ?? '未校验'}));
-  } catch (e) { if (active) error.value = e.message; } finally { loading.value = false; }
-}
-function reset() { form.tpassToken = ''; form.checkToken = ''; form.dzfpToken = ''; loginMessage.value = ''; }
-function login() {
-  if (submitting.value) return;
-  submitting.value = true; loginMessage.value = '';
-  try {
-    const url = getPlatformUrl(area, form.platform);
-    writeLoginCookies(form, {document, clientId: localStorage.getItem('clientId') || ''});
-    if (config.newTab) openInTab(url, {active: true}); else location.assign(url);
-    reset(); loginMessage.value = 'Cookie 已写入并通过读取检查。登录是否有效，请以目标页面结果为准。';
-  } catch (e) { showError(e.message); } finally { submitting.value = false; }
-}
-onMounted(refresh);
+const manual = ref(false), area = getRegion(location.href);
+const {search, filtered, loading, error, refresh} = useAccounts(area);
+const {form, submitting, loginMessage, reset, login} = useManualLogin(area);
 </script>

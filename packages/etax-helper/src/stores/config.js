@@ -1,45 +1,40 @@
 import { getValue, setValue } from '../core/userscript';
 import { reactive, ref } from 'vue';
 import { runtime, fail } from './runtime';
-const key = 'etax_helper_config';
-const defaults = { apiKey: '', newTab: true, tab: '', width: 720 };
+import { CONFIG_KEY, configDefaults, createConfigRepository } from '../core/config';
 export const storageWarning = ref('');
-export const config = reactive({...defaults});
-let readable = false;
-export function readConfig() {
-  let value = getValue(key, null);
-  const legacy = value == null;
-  if (value == null) {
-    // Block writes when legacy storage cannot be read: never silently replace it.
-    value = JSON.parse(localStorage.getItem(key) || 'null');
-  }
-  if (value != null && (typeof value !== 'object' || Array.isArray(value))) throw new Error('invalid config');
-  if (legacy && value != null) setValue(key, value);
-  return {...defaults, ...value};
+export const config = reactive({...configDefaults});
+const repository = createConfigRepository({getValue, setValue,
+  getLegacy: () => localStorage.getItem(CONFIG_KEY),
+  removeLegacy: () => localStorage.removeItem(CONFIG_KEY),
+});
+function warning(error, saving = false) {
+  if (error?.code === 'CONFIG_VERSION_NEWER') return '配置来自更高版本，已停止写入。请升级脚本后重新读取。';
+  if (error?.code === 'CONFIG_INVALID') return '配置格式异常，已停止本次写入并保留原数据。';
+  return saving ? '设置保存失败，请重试读取配置。' : '设置读取失败，已停止写入。请重试读取原配置。';
 }
+export const readConfig = () => repository.load();
 export function reloadConfig() {
   try {
     const next = readConfig();
+    for (const key of Object.keys(config)) if (!(key in next)) delete config[key];
     Object.assign(config, next);
-    readable = true; storageWarning.value = ''; runtime.config = 'ready';
+    storageWarning.value = ''; runtime.config = 'ready';
     return true;
-  } catch {
-    readable = false;
-    storageWarning.value = '设置读取失败，已停止写入。请重试读取原配置。';
+  } catch (error) {
+    storageWarning.value = warning(error);
     fail('config', 'CONFIG_READ_FAILED');
     return false;
   }
 }
 export function saveConfig(value) {
-  if (!readable) throw new Error('请先成功读取原配置');
-  const next = { ...config, ...value };
-  try { setValue(key, JSON.parse(JSON.stringify(next))); }
-  catch {
-    storageWarning.value = '设置保存失败，原配置未被替换。';
+  try {
+    const next = repository.save(value);
+    Object.assign(config, next);
+    storageWarning.value = ''; runtime.config = 'ready';
+  } catch (error) {
+    storageWarning.value = warning(error, true);
     fail('config', 'CONFIG_WRITE_FAILED');
-    throw new Error('设置保存失败');
+    throw new Error(storageWarning.value);
   }
-  Object.assign(config, next);
-  storageWarning.value = ''; runtime.config = 'ready';
-  try { localStorage.removeItem(key); } catch { /* Keep legacy data if cleanup is blocked. */ }
 }

@@ -1,6 +1,6 @@
 # ETax 助手
 
-基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.6**。
+基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.7**。
 
 [安装或更新脚本](https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js)
 
@@ -46,10 +46,11 @@ pnpm etax-helper:build
 | 目录 | 职责 |
 |---|---|
 | `src/components` | 账户、请求、设置界面 |
-| `src/core` | 浏览器监听、Cookie 操作 |
+| `src/core` | 浏览器监听、Cookie 操作、配置迁移与持久化 |
 | `src/config` | 地区识别和平台入口 |
-| `src/services` | 后端接口及超时、错误处理 |
-| `src/stores` | 配置迁移与存储 |
+| `src/services` | 后端接口、账户查询和登录流程 |
+| `src/composables` | 账户与登录界面状态及生命周期 |
+| `src/stores` | 配置与运行诊断的响应式状态 |
 | `src/utils` | 内容格式化、脱敏、通知 |
 | `tests` | 原始请求行为、边界条件和接口契约回归测试 |
 
@@ -116,3 +117,16 @@ Node 版本约束适用于开发/CI，不要求安装脚本的用户安装 Node�
 参考：[Vite 8 迁移说明](https://vite.dev/guide/migration)、[油猴构建插件](https://github.com/lisonge/vite-plugin-monkey)。
 
 本轮稳定基线：[已验收的 1.2.5](https://github.com/kxx/k-script/tree/7f0fd296a6ee124e2c31548cd69dbe0c2ac52de7/packages/etax-helper)。后续按独立版本推进配置迁移规则与业务逻辑整理、请求排查效率、发布流程完善，避免把这些功能变化混入工具链升级。
+
+## 配置与账户逻辑（1.2.7）
+
+- 配置格式版本 `schemaVersion: 1` 与脚本版本独立。保留 `etax_helper_config` 存储键及 `apiKey/newTab/tab/width` 扁平字段，兼容旧脚本读取。
+- 没有版本号的 GM 配置先在内存中迁移，成功保存时写入版本；旧 localStorage 配置在 GM 读取成功、格式校验通过后迁移，保存成功前不删除旧数据。未知扩展字段保留。
+- 更高格式版本、异常字段类型或读取失败会阻止写入，避免用默认值覆盖原配置；可在设置中重试读取。面板宽度接受旧数字字符串并限制在现有范围内。
+- 保存偏好时先重新读取持久配置，再合并本次修改，减少旧页面覆盖新设置的风险；GM 同步读写不提供跨标签页事务，完全同时的写入仍可能出现最后写入覆盖。
+- `src/core/config.js` 负责迁移、校验和持久化；`src/stores/config.js` 只管理 Vue 状态和运行诊断。
+- `src/services/accounts.js` 统一新旧账户字段、搜索和查询生命周期；`src/services/manual-login.js` 负责平台地址、Cookie 校验与跳转顺序。`src/composables` 管理界面状态，账户组件只负责展示和绑定操作。
+- 查询结果在组件卸载或 API Key 变化后不再更新界面；保留原有地区参数及服务协议。发票平台不需要 clientId，因此不读取该站点存储；其他平台仍按原规则校验 clientId。
+- 浏览器回归新增旧配置迁移、更高配置版本阻止写入场景。账号、Cookie、Token、配置内容均不会加入运行诊断或自动上传。
+
+本轮回退基线为[已验收的 1.2.6](https://github.com/kxx/k-script/tree/61e4192a618cc5aa569975631031ecb622f9866d/packages/etax-helper)。下一阶段单独改进请求排查效率，本版不新增请求操作或改变现有布局。

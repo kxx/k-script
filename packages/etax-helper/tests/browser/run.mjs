@@ -8,16 +8,18 @@ const bundle=readFileSync(new URL('../../dist/etax-helper.user.js',import.meta.u
 const vue=fixtureFile('vue2/dist/vue.runtime.min.js'),element=fixtureFile('element-ui/lib/index.js'),css=fixtureFile('element-ui/lib/theme-chalk/index.css');
 const browser=await chromium.launch({headless:true,executablePath:process.env.ETAX_CHROMIUM_PATH||undefined,args:JSON.parse(process.env.ETAX_CHROMIUM_ARGS||'[]')});
 try {
- for(const failure of ['none','config','xhr','fetch','both']) {
+ for(const failure of ['none','config','xhr','fetch','both','legacy','future']) {
   const page=await browser.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const boot=`${vue}\n${element}\n
     const originalVue=window.Vue, originalElement=window.ELEMENT;
     window.fixture={readFailed:${failure==='config'},saved:{apiKey:'PRIVATE_API_KEY',width:840,newTab:false},writes:0,copied:''};
+    if(${failure==='legacy'}) {localStorage.setItem('etax_helper_config',JSON.stringify(fixture.saved));fixture.saved=null;}
+    if(${failure==='future'}) fixture.saved.schemaVersion=99;
     const originalSend=XMLHttpRequest.prototype.send, originalFetch=window.fetch;
     fixture.hooksRestored=()=>XMLHttpRequest.prototype.send===originalSend&&window.fetch===originalFetch;
     if(${['xhr','both'].includes(failure)}) Object.defineProperty(XMLHttpRequest.prototype,'send',{value:originalSend,writable:false,configurable:true});
     if(${['fetch','both'].includes(failure)}) Object.defineProperty(window,'fetch',{value:originalFetch,writable:false,configurable:true});
-    fixture.recover=()=>{fixture.readFailed=false;if(${['xhr','both'].includes(failure)}) Object.defineProperty(XMLHttpRequest.prototype,'send',{value:originalSend,writable:true,configurable:true});if(${['fetch','both'].includes(failure)}) Object.defineProperty(window,'fetch',{value:originalFetch,writable:true,configurable:true});};
+    fixture.recover=()=>{fixture.readFailed=false;if(${failure==='future'}) delete fixture.saved.schemaVersion;if(${['xhr','both'].includes(failure)}) Object.defineProperty(XMLHttpRequest.prototype,'send',{value:originalSend,writable:true,configurable:true});if(${['fetch','both'].includes(failure)}) Object.defineProperty(window,'fetch',{value:originalFetch,writable:true,configurable:true});};
     document.addEventListener('DOMContentLoaded',()=>{
       new Vue({render:h=>h('el-button',{attrs:{id:'host-button'},on:{click:()=>fixture.hostClicked=true}},['主系统按钮'])}).$mount('#host');
       fixture.hostStyle=()=>{const style=getComputedStyle(document.getElementById('host-button'));return [style.color,style.backgroundColor,style.fontSize,document.body.className,document.body.style.cssText]};
@@ -49,11 +51,12 @@ try {
   const diagnosticValue=label=>page.locator('.diagnostics dt').filter({hasText:label}).locator('xpath=following-sibling::dd[1]');
   assert.equal(await diagnosticValue('XHR').innerText(),['xhr','both'].includes(failure)?'失败':'正常');
   assert.equal(await diagnosticValue('Fetch').innerText(),['fetch','both'].includes(failure)?'失败':'正常');
-  assert.equal(await diagnosticValue('配置').innerText(),failure==='config'?'失败':'正常');
-  if(failure==='config') {
+  assert.equal(await diagnosticValue('配置').innerText(),['config','future'].includes(failure)?'失败':'正常');
+  if(['config','future'].includes(failure)) {
     await page.getByRole('button',{name:'保存设置',exact:true}).click();
     assert.equal(await page.evaluate(()=>fixture.writes),0);
     assert.equal(await page.evaluate(()=>fixture.saved.apiKey),'PRIVATE_API_KEY');
+    if(failure==='future')assert.equal(await page.evaluate(()=>fixture.saved.schemaVersion),99);
   }
   await page.getByRole('button',{name:'复制诊断',exact:true}).click();
   const copied=await page.evaluate(()=>fixture.copied);
@@ -69,6 +72,8 @@ try {
   assert.equal(await page.evaluate(()=>fixture.saved.width),840);
   await page.getByRole('button',{name:'返回',exact:true}).click();
   await page.getByRole('button',{name:'请求',exact:true}).click();
+  assert.equal(await page.evaluate(()=>fixture.saved.schemaVersion),1);
+  if(failure==='legacy')assert.equal(await page.evaluate(()=>localStorage.getItem('etax_helper_config')),null);
   await page.evaluate(()=>new Promise((resolve,reject)=>{const xhr=new XMLHttpRequest();xhr.open('GET','/once');xhr.onload=resolve;xhr.onerror=reject;xhr.send();}));
   await page.getByRole('button',{name:'/once',exact:true}).waitFor();
   assert.equal(await page.getByRole('button',{name:'/once',exact:true}).count(),1);
