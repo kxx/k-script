@@ -1,5 +1,10 @@
 import { ElMessage } from 'element-plus';
-let container;
+let container, current;
 export const setNoticeContainer = value => { container = value; };
-export const showError = message => ElMessage({ message: String(message), type: 'error', appendTo: container, duration: 5000 });
-export const showSuccess = message => ElMessage({ message, type: 'success', appendTo: container });
+function show(message, type, duration) {
+  current?.close();
+  current = ElMessage({ message: String(message), type, appendTo: container, duration });
+  return current;
+}
+export const showError = message => show(message, 'error', 5000);
+export const showSuccess = message => show(message, 'success', 2500);

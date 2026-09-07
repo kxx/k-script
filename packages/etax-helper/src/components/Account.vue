@@ -1,31 +1,33 @@
 <template>
-  <section class="account">
-    <div class="toolbar"><ElInput v-model="search" clearable placeholder="搜索税号、企业名称、Cookie ID"/><ElButton :loading="loading" @click="refresh">刷新</ElButton></div>
-    <ElAlert v-if="!config.apiKey" title="请先在设置中填写 API Key，再刷新账户列表。手动登录无需 API Key。" type="info" :closable="false"/>
-    <ElAlert v-if="error" :title="error" type="error" :closable="false"/>
-    <ElTable :data="filtered" max-height="300" size="small" empty-text="暂无账户">
-      <ElTableColumn prop="taxNo" label="税号" min-width="160"/>
-      <ElTableColumn prop="company" label="名称" min-width="140"/>
-      <ElTableColumn prop="user" label="用户" min-width="90"/>
-      <ElTableColumn prop="statusText" label="状态" min-width="90"/>
-      <ElTableColumn label="操作" width="190"><template #default><ElButton size="small" disabled>校验</ElButton><ElButton size="small" disabled>DTA / BIM / RIM</ElButton></template></ElTableColumn>
-    </ElTable>
-    <p class="hint">自动校验及 DTA / BIM / RIM 授权尚未接通，请使用下方手动登录。</p>
-    <h3>手动登录 <small>{{ area || '未识别地区' }}</small></h3>
-    <ElForm label-width="110px" size="small" @submit.prevent="login">
-      <ElFormItem label="平台"><ElRadioGroup v-model="form.platform"><ElRadioButton v-for="item in platforms" :key="item.value" :label="item.value">{{ item.label }}</ElRadioButton></ElRadioGroup></ElFormItem>
-      <template v-if="form.platform === 'dppt'">
-        <ElFormItem label="CheckToken"><ElInput v-model="form.checkToken" type="password" show-password autocomplete="off"/></ElFormItem>
-        <ElFormItem label="DzfpToken"><ElInput v-model="form.dzfpToken" type="password" show-password autocomplete="off"/></ElFormItem>
+  <section class="workspace">
+    <template v-if="!manual">
+      <div class="toolbar"><ElInput v-model="search" clearable placeholder="搜索税号、企业名称、Cookie ID" :prefix-icon="Search"/><ElButton :icon="Refresh" :loading="loading" aria-label="刷新账户" @click="refresh"/><ElButton type="primary" @click="manual=true">手动登录</ElButton></div>
+      <div v-if="!config.apiKey" class="empty-state"><span class="empty-icon"><User/></span><h3>连接你的账户</h3><p>配置 API Key 后查看账户，或直接使用手动登录。</p><ElButton type="primary" plain @click="emit('settings')">去配置</ElButton></div>
+      <template v-else>
+        <ElAlert v-if="error" :title="error" type="error" :closable="false"/>
+        <ElTable :data="filtered" height="100%" class="data-table" empty-text="暂无匹配账户" size="small">
+          <ElTableColumn prop="company" label="企业名称" min-width="180"/>
+          <ElTableColumn prop="taxNo" label="税号" min-width="170"/>
+          <ElTableColumn prop="user" label="用户" min-width="90"/>
+          <ElTableColumn label="状态" width="90"><template #default="{row}"><span class="neutral-status">{{row.statusText}}</span></template></ElTableColumn>
+        </ElTable>
       </template>
-      <ElFormItem v-else label="TpassToken"><ElInput v-model="form.tpassToken" type="password" show-password autocomplete="off"/></ElFormItem>
-      <p v-if="['zhcx','ckts'].includes(form.platform)" class="hint">沿用统一登录入口，登录后请在电局中进入对应业务。</p>
-      <ElFormItem><ElButton type="primary" :loading="submitting" :disabled="!area" @click="login">写入并打开</ElButton><ElButton @click="reset">重置</ElButton></ElFormItem>
-    </ElForm>
-    <ElAlert v-if="loginMessage" :title="loginMessage" type="info" :closable="false"/>
+    </template>
+    <template v-else>
+      <div class="subheading"><button class="back-button" @click="manual=false;reset()"><ArrowLeft/>返回账户</button></div>
+      <div class="form-page"><div class="page-heading"><h2>手动登录</h2><p>选择业务平台，填写对应的登录凭据。</p></div>
+      <ElForm label-position="top" @submit.prevent="login">
+        <ElFormItem label="业务平台"><ElRadioGroup v-model="form.platform"><ElRadioButton v-for="item in platforms" :key="item.value" :label="item.value">{{item.label}}</ElRadioButton></ElRadioGroup></ElFormItem>
+        <template v-if="form.platform==='dppt'"><ElFormItem label="CheckToken"><ElInput v-model="form.checkToken" type="password" show-password clearable autocomplete="off" placeholder="输入 CheckToken"/></ElFormItem><ElFormItem label="DzfpToken"><ElInput v-model="form.dzfpToken" type="password" show-password clearable autocomplete="off" placeholder="输入 DzfpToken"/></ElFormItem></template>
+        <ElFormItem v-else label="TpassToken"><ElInput v-model="form.tpassToken" type="password" show-password clearable autocomplete="off" placeholder="输入 TpassToken"/></ElFormItem>
+        <p v-if="['zhcx','ckts'].includes(form.platform)" class="hint">登录后，请在电局统一入口进入对应业务。</p>
+        <div class="form-actions"><ElButton type="primary" :loading="submitting" :disabled="!area" @click="login">写入并打开</ElButton><ElButton @click="reset">清空</ElButton></div>
+      </ElForm><ElAlert v-if="loginMessage" :title="loginMessage" type="info" :closable="false"/></div>
+    </template>
   </section>
 </template>
 <script setup>
+import { Search, Refresh, User, ArrowLeft } from '@element-plus/icons-vue';
 import { GM_openInTab } from '$';
 import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue';
 import { ElAlert, ElInput, ElButton, ElTable, ElTableColumn, ElForm, ElFormItem, ElRadioGroup, ElRadioButton } from 'element-plus';
@@ -34,6 +36,8 @@ import support from '../services/support';
 import { getRegion, getPlatformUrl, platforms } from '../config/platforms';
 import { writeLoginCookies } from '../core/cookies';
 import { showError } from '../utils/notice';
+const emit = defineEmits(['settings']);
+const manual = ref(false);
 const area = getRegion(location.href), search = ref(''), rows = ref([]), loading = ref(false), error = ref(''), submitting = ref(false), loginMessage = ref('');
 const form = reactive({platform: 'home', tpassToken: '', checkToken: '', dzfpToken: ''});
 let active = true;

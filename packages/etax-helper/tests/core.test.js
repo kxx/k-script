@@ -86,3 +86,11 @@ test('service preserves account and decryption request contracts',async()=>{
 test('plain response is safe to display and common secrets redact on copy',()=>{
  assert.equal(format('<html>error</html>'),'<html>error</html>');assert.equal(redact('{"token":"secret","count":2}'),'{"token":"***","count":2}');assert.equal(redact('token=abc&x=1'),'token=***&x=1');
 });
+
+test('JSON highlighting preserves content exactly and renders markup as text',async()=>{
+ const {highlightJson}=await import('../src/utils/highlight.js');
+ const text=JSON.stringify({name:'<img onerror="alert(1)">',amount:-1.2,ok:true,items:[null]},null,2);
+ const tokens=highlightJson(text);assert.equal(tokens.map(token=>token.text).join(''),text);
+ assert(tokens.some(token=>token.type==='json-key'));assert(tokens.some(token=>token.type==='json-number'));
+ assert.deepEqual(highlightJson('<script>alert(1)</script>'),[{type:'',text:'<script>alert(1)</script>'}]);
+});

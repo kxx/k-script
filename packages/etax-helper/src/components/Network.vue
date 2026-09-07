@@ -1,37 +1,45 @@
 <template>
-  <section>
-    <div class="toolbar"><ElInput v-model="query" placeholder="搜索接口 URL" clearable/><ElSelect :teleported="false" v-model="filter" style="width:130px"><ElOption label="全部请求" value="all"/><ElOption label="失败请求" value="error"/><ElOption label="GET" value="GET"/><ElOption label="POST" value="POST"/></ElSelect></div>
-    <div class="toolbar"><ElButton @click="toggle">{{ paused ? '继续记录' : '暂停记录' }}</ElButton><ElButton @click="collector.clear">清空</ElButton><span>{{ paused ? '已暂停' : '正在记录' }} · {{ records.length }}/50 条</span></div>
-    <ElTable :data="filtered" max-height="500" size="small" empty-text="暂无请求；打开面板前已完成的采集也会显示">
-      <ElTableColumn prop="url" label="接口" min-width="220"/>
-      <ElTableColumn prop="method" label="方法" width="75"/>
-      <ElTableColumn label="状态" width="100"><template #default="{row}">{{ row.status || row.outcome }}</template></ElTableColumn>
-      <ElTableColumn label="耗时" width="90"><template #default="{row}">{{ row.duration }} ms</template></ElTableColumn>
-      <ElTableColumn label="操作" width="120"><template #default="{row}"><ElButton link type="primary" @click="view(row,'request')">参数</ElButton><ElButton link type="primary" @click="view(row,'response')">响应</ElButton></template></ElTableColumn>
-    </ElTable>
-    <ElDialog v-model="visible" :append-to="overlay" width="min(850px, 94vw)" :title="kind === 'request' ? '请求参数' : '响应内容'" @closed="invalidate">
-      <div class="toolbar"><ElButton @click="copy">复制（脱敏）</ElButton><ElButton v-if="encrypted" type="primary" :loading="decrypting" @click="decrypt">解密参数</ElButton></div>
-      <p v-if="encrypted" class="hint">解密会向 skynjweb.com 发送该请求的 Token 与密文。</p>
+  <section class="workspace">
+    <template v-if="!visible">
+      <div class="toolbar request-toolbar"><ElInput v-model="query" placeholder="搜索接口路径" clearable :prefix-icon="Search"/><ElSelect :teleported="false" v-model="filter" class="request-filter" aria-label="请求筛选"><ElOption label="全部请求" value="all"/><ElOption label="失败请求" value="error"/><ElOption label="GET" value="GET"/><ElOption label="POST" value="POST"/></ElSelect><ElButton :icon="paused?VideoPlay:VideoPause" :title="paused?'继续记录':'暂停记录'" :aria-label="paused?'继续记录':'暂停记录'" @click="toggle"/><ElButton :icon="Delete" title="清空请求" aria-label="清空请求" @click="collector.clear"/></div>
+      <ElTable :data="filtered" height="100%" class="data-table request-table" size="small" empty-text="等待请求，业务操作后将在这里显示" @row-click="row=>view(row,'request')">
+        <ElTableColumn label="接口路径" min-width="250"><template #default="{row}"><button class="request-path" :title="row.url" @click.stop="view(row,'request')">{{pathOf(row.url)}}</button></template></ElTableColumn>
+        <ElTableColumn label="方法" width="85"><template #default="{row}"><span class="method" :class="{post:row.method==='POST'}">{{row.method}}</span></template></ElTableColumn>
+        <ElTableColumn label="状态" width="90"><template #default="{row}"><span class="status" :class="{error:failed(row)}">{{row.status || row.outcome}}</span></template></ElTableColumn>
+        <ElTableColumn label="耗时" width="90" align="right"><template #default="{row}"><span class="duration">{{row.duration}} <small>ms</small></span></template></ElTableColumn>
+      </ElTable>
+    </template>
+    <template v-else>
+      <div class="subheading"><button class="back-button" @click="visible=false;invalidate()"><ArrowLeft/>返回请求列表</button></div>
+      <div class="request-summary"><span class="method" :class="{post:selected.method==='POST'}">{{selected.method}}</span><span class="status" :class="{error:failed(selected)}">{{selected.status || selected.outcome}}</span><span class="duration">{{selected.duration}} ms</span><p>{{selected.url}}</p></div>
+      <div class="detail-toolbar"><div class="detail-tabs"><button :class="{active:kind==='request'}" @click="changeKind('request')">参数</button><button :class="{active:kind==='response'}" @click="changeKind('response')">响应</button></div><div class="detail-actions"><ElButton v-if="encrypted" type="primary" plain size="small" :loading="decrypting" @click="decrypt">解密参数</ElButton><ElButton size="small" :icon="CopyDocument" @click="copy">复制（脱敏）</ElButton></div></div>
+      <p v-if="encrypted" class="decrypt-note">解密时向 skynjweb.com 发送本次请求的 Token 与密文。</p>
       <ElAlert v-if="error" :title="error" type="error" :closable="false"/>
-      <pre>{{ content }}</pre>
-    </ElDialog>
+      <pre class="code-view"><code><span v-for="(token,index) in highlighted" :key="index" :class="token.type">{{token.text}}</span></code></pre>
+    </template>
   </section>
 </template>
 <script setup>
-import { computed, inject, onBeforeUnmount, ref, shallowRef } from 'vue';
-import { ElTable, ElTableColumn, ElButton, ElDialog, ElInput, ElSelect, ElOption, ElAlert } from 'element-plus';
+import { computed, inject, onBeforeUnmount, ref, shallowRef, toRaw } from 'vue';
+import { ElTable, ElTableColumn, ElButton, ElInput, ElSelect, ElOption, ElAlert } from 'element-plus';
+import { Search, VideoPause, VideoPlay, Delete, ArrowLeft, CopyDocument } from '@element-plus/icons-vue';
+import { highlightJson } from '../utils/highlight';
 import { GM_setClipboard } from '$';
 import support from '../services/support';
 import { format, redact } from '../utils/format';
 import { showSuccess, showError } from '../utils/notice';
-const collector = inject('collector'), overlay = inject('overlay'), records = inject('records'), paused = inject('paused');
+const collector = inject('collector'), records = inject('records'), paused = inject('paused');
 const query = ref(''), filter = ref('all'), visible = ref(false), kind = ref(''), selected = shallowRef(null), content = ref(''), error = ref(''), decrypting = ref(false);
 let revision = 0;
 const filtered = computed(() => records.value.filter(row => row.url.toLowerCase().includes(query.value.toLowerCase()) && (filter.value === 'all' || (filter.value === 'error' ? row.status >= 400 || row.outcome !== '完成' : row.method === filter.value))));
+const highlighted = computed(() => highlightJson(content.value));
+function pathOf(url) { try { return new URL(url, location.href).pathname; } catch { return url.split('?')[0]; } }
+function failed(row) { return row.status >= 400 || row.outcome !== '完成'; }
+function changeKind(type) { view(selected.value, type); }
 const encrypted = computed(() => { if (kind.value !== 'request') return ''; try { return JSON.parse(selected.value?.data).Jmbw || ''; } catch { return ''; } });
 function toggle() { paused.value = !paused.value; collector.setPaused(paused.value); }
 function invalidate() { revision++; decrypting.value = false; }
-function view(row, type) { invalidate(); selected.value = row; kind.value = type; error.value = ''; content.value = format(type === 'request' ? row.data : row.response); visible.value = true; }
+function view(row, type) { invalidate(); selected.value = toRaw(row); kind.value = type; error.value = ''; content.value = format(type === 'request' ? row.data : row.response); visible.value = true; }
 async function decrypt() {
   if (decrypting.value) return;
   const current = ++revision, row = selected.value, token = collector.getToken(row);
