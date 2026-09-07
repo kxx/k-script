@@ -1,40 +1,25 @@
-import { createApp } from 'vue';
+import { createApp, shallowRef, ref } from 'vue';
+import { unsafeWindow } from '$';
 import App from './App.vue';
-import ElementPlus from 'element-plus';
-
-
-// const app = createApp(App);
-// app.use(ElementPlus);
-
-// // 创建一个宿主元素，用于挂载Shadow DOM
-// const shadowHost = document.createElement('div');
-// shadowHost.id = 'etax-helper';
-// document.body.appendChild(shadowHost);
-
-// // 创建一个开放模式的Shadow DOM
-// const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
-
-// // 将包含 data-vite-dev-id 的样式移动到 Shadow DOM
-// const styles = document.querySelectorAll('style[data-vite-dev-id]');
-// styles.forEach((styleElement) => {
-//   shadowRoot.appendChild(styleElement.cloneNode(true));
-// });
-
-// // 创建一个容器元素作为 Vue 应用的挂载点，并附加到 Shadow DOM 中
-// const shadowContainer = document.createElement('div');
-// shadowRoot.appendChild(shadowContainer);
-
-// // 将 Vue 应用挂载到容器元素上
-// app.mount(shadowContainer);
-
-
-
-createApp(App).mount(
-  (() => {
-    const app = document.createElement('div');
-    app.id = 'etax-helper';
-    document.body.append(app);
-    return app;
-  })(),
-);
-
+import helperCss from './style.css?inline';
+import elementCss from 'element-plus/dist/index.css?inline';
+import { installNetwork } from './core/network';
+import { parseCookies } from './core/cookies';
+import { setNoticeContainer } from './utils/notice';
+// Install before mounting the panel; DOM readiness does not delay collection.
+const collector = installNetwork(unsafeWindow, { getToken: () => parseCookies(document.cookie)['dzfp-ssotoken'] || '' });
+function mount() {
+  if (document.getElementById('etax-helper')) return;
+  const host = document.createElement('div'); host.id = 'etax-helper';
+  const shadow = host.attachShadow({mode: 'open'});
+  const style = document.createElement('style');
+  style.textContent = elementCss.replaceAll(':root', ':host') + helperCss + '\n:host{all:initial;font-family:Arial,"Microsoft YaHei",sans-serif;font-size:14px;color:#303133;--el-color-primary:#409eff}';
+  shadow.append(style);
+  const container = document.createElement('div'), overlay = document.createElement('div');
+  shadow.append(container, overlay); document.body.append(host);
+  setNoticeContainer(overlay);
+  const records = shallowRef([]), paused = ref(false);
+  collector.subscribe(value => {records.value = value;});
+  createApp(App).provide('collector',collector).provide('records',records).provide('paused',paused).provide('overlay',overlay).mount(container);
+}
+if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount, {once:true});

@@ -1,10 +1,13 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
+import { readFileSync } from 'node:fs';
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 import vue from '@vitejs/plugin-vue';
 import monkey, { cdn, util } from 'vite-plugin-monkey';
 
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: { __ETAX_VERSION__: JSON.stringify(version) },
   assetsInclude: ['**/*.html'],
   plugins: [
     vue(),
@@ -12,7 +15,8 @@ export default defineConfig({
       entry: 'src/main.js',
       userscript: {
         name: "etax助手",
-        version: loadEnv("", process.cwd(), '').VITE_VERSION,
+        version,
+        'run-at': 'document-start',
         license: 'MIT',
         description: 'etax小助手',
         namespace: 'https://github.com/kxx/k-script',
@@ -25,17 +29,11 @@ export default defineConfig({
       build: {
         externalGlobals: {
           vue: cdn.jsdelivr('Vue', 'dist/vue.global.prod.js').concat(
-            await util.fn2dataUrl(() => {
-              window.Vue = Vue; // work with element-plus
-            }),
+            await util.fn2dataUrl(() => { window.Vue = Vue; }),
           ),
-          jquery: cdn.bootcdn('$', 'jquery.min.js'),
-          axios: cdn.bootcdn('axios', 'axios.min.js'),
           'element-plus': cdn.jsdelivr('ElementPlus', 'dist/index.full.min.js')
         },
-        externalResource: {
-          'element-plus/dist/index.css': cdn.bootcdn('', 'index.min.css'),
-        }
+
       },
     })
   ],

@@ -1,0 +1,24 @@
+name: ETax Helper checks
+on:
+  push:
+    branches: [main]
+    paths: ['packages/etax-helper/**', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.github/workflows/etax-helper.yml']
+  pull_request:
+    paths: ['packages/etax-helper/**', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.github/workflows/etax-helper.yml']
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm etax-helper:test
+      - run: pnpm etax-helper:build
+      - name: Verify committed userscript matches sources
+        run: git diff --exit-code -- packages/etax-helper/dist/etax-helper.user.js

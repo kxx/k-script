@@ -1,12 +1,16 @@
 {
   "name": "k-script",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "etax-helper:dev": "pnpm -r --filter=./packages/etax-helper dev",
     "qixin-helper:dev": "pnpm -r --filter=./packages/qixin-helper dev",
     "showdoc-helper:dev": "pnpm -r --filter=./packages/showdoc-helper dev",
-    "build": "pnpm -r --filter=./packages/* build"
+    "build": "pnpm -r --filter=./packages/* build",
+    "etax-helper:test": "pnpm --filter etax-helper test",
+    "etax-helper:build": "pnpm --filter etax-helper build"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.0.6",
@@ -18,5 +22,6 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "vite": "^4.1.1"
-  }
+  },
+  "packageManager": "pnpm@9.15.9"
 }
