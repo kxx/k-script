@@ -10,3 +10,5 @@
 @media(max-width:600px){.panel-header{padding:0 18px;height:62px}.panel-content{padding:18px 14px}.panel-footer{padding:0 14px}.nav-tabs{padding:0 18px}.toolbar{gap:6px}.request-filter{width:108px}.form-page{padding:0}.el-radio-button__inner{padding:8px 9px!important}.detail-tabs button{padding:5px 10px}.brand{gap:8px}.version{font-size:10px}}
 .el-message{left:auto!important;top:auto!important;right:24px;bottom:58px;transform:none!important;max-width:min(420px,calc(96vw - 40px));box-shadow:0 4px 18px #263d5710}
 .code-view{font-family:ui-monospace,SFMono-Regular,Consolas,"Microsoft YaHei",monospace}
+
+.diagnostics{margin-top:24px;border-top:1px solid #e5eaf1;padding-top:16px}.diagnostics summary{cursor:pointer;font-weight:600}.diagnostics dl{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;font-size:12px}.diagnostics dt{color:#69788b}.diagnostics dd{margin:0;overflow-wrap:anywhere;user-select:text}.diagnostic-actions{display:flex;flex-wrap:wrap;gap:8px}.diagnostic-actions .el-button+.el-button{margin-left:0}

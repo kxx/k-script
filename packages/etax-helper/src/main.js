@@ -6,8 +6,33 @@ import elementCss from 'element-plus/dist/index.css?inline';
 import { installNetwork } from './core/network';
 import { parseCookies } from './core/cookies';
 import { setNoticeContainer } from './utils/notice';
-// Install before mounting the panel; DOM readiness does not delay collection.
-const collector = installNetwork(getPageWindow(), { getToken: () => parseCookies(document.cookie)['dzfp-ssotoken'] || '' });
+import { reloadConfig } from './stores/config';
+import { runtime, fail } from './stores/runtime';
+const records = shallowRef([]), paused = ref(false);
+let network, unsubscribe = () => {}, dispose = () => { unsubscribe(); network?.uninstall(); };
+function retryNetwork() {
+  try {
+    if (network) network.retry();
+    else {
+      network = installNetwork(getPageWindow(), {
+        getToken: () => parseCookies(document.cookie)['dzfp-ssotoken'] || '',
+        onStatus: status => {
+          Object.assign(runtime, status);
+          for (const module of ['xhr', 'fetch']) if (status[module] === 'failed') fail(module, 'HOOK_INSTALL_FAILED');
+        },
+      });
+      unsubscribe = network.subscribe(value => { records.value = value; });
+    }
+    network.setPaused(paused.value);
+  } catch { fail('xhr', 'NETWORK_INIT_FAILED'); fail('fetch', 'NETWORK_INIT_FAILED'); }
+}
+const collector = {
+  clear: () => network?.clear(), getToken: record => network?.getToken(record) || '',
+  setPaused: value => network?.setPaused(value),
+};
+// Each module catches its own failures; recording still starts at document-start.
+reloadConfig();
+retryNetwork();
 function mount() {
   if (document.getElementById('etax-helper')) return;
   const host = document.createElement('div'); host.id = 'etax-helper';
@@ -36,8 +61,18 @@ function mount() {
   const documentObserver = new MutationObserver(ensureHost);
   documentObserver.observe(document, {childList: true});
   setNoticeContainer(overlay);
-  const records = shallowRef([]), paused = ref(false);
-  collector.subscribe(value => {records.value = value;});
-  createApp(App).provide('collector',collector).provide('records',records).provide('paused',paused).provide('overlay',overlay).mount(container);
+  const app = createApp(App);
+  app.config.errorHandler = () => fail('ui', 'UI_RENDER_FAILED');
+  dispose = () => {
+    rootObserver.disconnect(); documentObserver.disconnect(); unsubscribe();
+    network?.uninstall(); app.unmount(); host.remove(); setNoticeContainer(null);
+    window.removeEventListener('pagehide', onPageHide);
+  };
+  app.provide('collector',collector).provide('records',records).provide('paused',paused)
+    .provide('overlay',overlay).provide('retryNetwork',retryNetwork).mount(container);
+  if (runtime.ui !== 'failed') runtime.ui = 'ready';
 }
-if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount, {once:true});
+function safeMount() { try { mount(); } catch { fail('ui', 'UI_MOUNT_FAILED'); } }
+function onPageHide(event) { if (!event.persisted) { document.removeEventListener('DOMContentLoaded', safeMount); dispose(); } }
+window.addEventListener('pagehide', onPageHide);
+if (document.body) safeMount(); else document.addEventListener('DOMContentLoaded', safeMount, {once:true});

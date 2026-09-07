@@ -8,10 +8,12 @@
         <div class="setting-row"><div><strong>面板宽度</strong><p>也可以拖动面板左边缘调整</p></div><ElInputNumber v-model="form.width" :min="480" :max="1400" :step="40" aria-label="面板宽度"/></div>
         <div class="form-actions"><ElButton type="primary" @click="save">保存设置</ElButton></div>
       </ElForm>
+      <Diagnostics @config-reloaded="syncForm"/>
     </div>
   </section>
 </template>
 <script setup>
+import Diagnostics from './Diagnostics.vue';
 import {reactive} from 'vue';
 import {ArrowLeft} from '@element-plus/icons-vue';
 import {ElAlert,ElForm,ElFormItem,ElInput,ElSwitch,ElInputNumber,ElButton} from 'element-plus';
@@ -19,5 +21,6 @@ import {config,saveConfig,storageWarning} from '../stores/config';
 import {showSuccess,showError} from '../utils/notice';
 defineEmits(['back']);
 const form=reactive({apiKey:config.apiKey,newTab:config.newTab,width:config.width});
+function syncForm(){Object.assign(form,{apiKey:config.apiKey,newTab:config.newTab,width:config.width});}
 function save(){try{saveConfig({...form,apiKey:form.apiKey.trim(),width:form.width||720});showSuccess('设置已保存');}catch{showError('设置保存失败，请检查脚本管理器权限');}}
 </script>

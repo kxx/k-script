@@ -1,6 +1,6 @@
 # ETax 助手
 
-基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.3**。
+基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.4**。
 
 [安装或更新脚本](https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js)
 
@@ -75,3 +75,23 @@ pnpm etax-helper:build
 现场 `x0 is not a function` 对应旧产物中的 `window.GM_getValue`。本版通过 `src/core/userscript.js` 直接访问油猴注入的作用域绑定，不再使用构建插件 `$` 导出的 window.GM_* 访问路径。全部 API 显式声明权限，并由构建检查防止退回旧实现。
 
 验证包含：GM API 仅为局部绑定且 window 上完全没有对应属性；旧版复现同一报错，新版纸飞机、配置读写、账户请求、登录开页、解密及复制均可用。GM 存储接口异常时保留入口，并在设置页显示错误，不会自动覆盖或删除无法读取的持久配置。
+
+## 稳定性改造（1.2.4）
+
+- 配置、XHR 和 Fetch 分别记录启动结果。配置读取或拦截安装失败不会中断纸飞机挂载；页脚区分正常、部分可用、失败和暂停。
+- 设置底部“运行诊断”默认折叠，提供脚本/管理器版本、地区、frame、GM 接口可用性、模块状态、最近一次内部错误。错误使用固定原因码，不保存原始异常；复制只含这些字段和页面 origin，不含路径、查询参数、片段、配置或请求，也不会上传。
+- “重试读取配置”重新载入持久配置并同步设置表单（会替换表单中尚未保存的编辑）；读取失败时禁止写入。旧 localStorage 迁移仍在成功读取、校验后执行，保存成功后清理旧值。
+- “重试请求采集”只重试未成功的传输层。XHR 部分安装失败会回退已安装的包装，避免重复监听。页面退出清理观察器、订阅、XHR 事件和正在读取的 Fetch 副本；浏览器往返缓存保留原实例。
+- 生产依赖和工具链版本未升级；Vue 2 / Element UI 仅用于模拟旧主系统的测试 fixture，不打进用户脚本。
+
+运行生成产物的浏览器回归：
+
+```bash
+pnpm --filter etax-helper exec playwright install chromium
+pnpm etax-helper:build
+pnpm --filter etax-helper test:browser
+```
+
+浏览器测试通过真实响应头施加不含 unsafe-eval 的 CSP，GM API 仅为 userscript 局部绑定。覆盖正常启动、配置读取失败、XHR/Fetch 单独及同时失败、恢复后重复重试、诊断脱敏、主系统 Vue 2/Element UI 共存、宿主移除及 body 重绘。CI 同步执行该测试。它模拟脚本管理器的注入行为，不能替代真实 Tampermonkey 和各省电局现场验收。
+
+已确认可用基线为提交 `1c276fbdc8933085afd99978cf3b8a584929c352`（1.2.3）。主分支检查通过后，CI 创建固定标签 `etax-helper-v1.2.3`；已有标签绝不覆盖。详细发布记录见 [CHANGELOG.md](CHANGELOG.md)。

@@ -94,3 +94,41 @@ test('JSON highlighting preserves content exactly and renders markup as text',as
  assert(tokens.some(token=>token.type==='json-key'));assert(tokens.some(token=>token.type==='json-number'));
  assert.deepEqual(highlightJson('<script>alert(1)</script>'),[{type:'',text:'<script>alert(1)</script>'}]);
 });
+
+test('XHR installation rolls back partial changes; retry keeps successful fetch hook',()=>{
+ class XHR extends FakeXHR {}
+ const originalOpen=XHR.prototype.open, originalSend=XHR.prototype.send;
+ Object.defineProperty(XHR.prototype,'send',{value:originalSend,writable:false,configurable:true});
+ const target={XMLHttpRequest:XHR,fetch:()=>Promise.resolve(new Response('ok'))};
+ const api=installNetwork(target),fetchHook=target.fetch;
+ assert.deepEqual(api.getStatus(),{xhr:'failed',fetch:'ready'});
+ assert.equal(XHR.prototype.open,originalOpen);
+ Object.defineProperty(XHR.prototype,'send',{value:originalSend,writable:true,configurable:true});
+ api.retry();api.retry();
+ assert.equal(target.fetch,fetchHook);assert.equal(api.getStatus().xhr,'ready');
+ let records=[];api.subscribe(value=>records=value);
+ const xhr=new XHR();xhr.open('GET','/once');xhr.send();xhr.complete();assert.equal(records.length,1);
+ api.uninstall();assert.equal(XHR.prototype.open,originalOpen);assert.equal(XHR.prototype.send,originalSend);
+});
+test('failed fetch installation does not block XHR and uninstall releases pending listeners',()=>{
+ class XHR extends FakeXHR {
+  handlers=new Set();
+  addEventListener(type,fn){this.handlers.add(fn);super.addEventListener(type,fn);}
+  removeEventListener(type,fn){this.handlers.delete(fn);super.removeEventListener(type,fn);}
+ }
+ const target={XMLHttpRequest:XHR};
+ Object.defineProperty(target,'fetch',{value:()=>{},writable:false});
+ const api=installNetwork(target);assert.deepEqual(api.getStatus(),{xhr:'ready',fetch:'failed'});
+ const xhr=new XHR();xhr.open('GET','/pending');xhr.send();assert(xhr.handlers.size>0);
+ api.uninstall();assert.equal(xhr.handlers.size,0);
+});
+test('unavailable transports can be installed later; throwing XHR getter does not block fetch',()=>{
+ const target={fetch:()=>Promise.resolve(new Response('ok'))};
+ Object.defineProperty(target,'XMLHttpRequest',{configurable:true,get(){throw Error('blocked');}});
+ const api=installNetwork(target);assert.deepEqual(api.getStatus(),{xhr:'failed',fetch:'ready'});
+ class XHR extends FakeXHR {}
+ Object.defineProperty(target,'XMLHttpRequest',{value:XHR});api.retry();
+ assert.equal(api.getStatus().xhr,'ready');api.uninstall();
+ const empty={};const later=installNetwork(empty);assert.equal(later.getStatus().xhr,'unavailable');
+ empty.XMLHttpRequest=class extends FakeXHR {};later.retry();assert.equal(later.getStatus().xhr,'ready');later.uninstall();
+});
