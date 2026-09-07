@@ -1,6 +1,6 @@
 # ETax 助手
 
-基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.1**。
+基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.2**。
 
 [安装或更新脚本](https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js)
 
@@ -61,3 +61,11 @@ pnpm etax-helper:build
 - 在 Chromium 中加载 Vue 2.7.16 + Element UI 2.15.14 的模拟主系统，验证插件打开前后主系统按钮样式、body 类名/样式不变，Vue/ELEMENT 对象引用保持不变，主系统弹窗正常。
 - 浏览器交互验证：纸飞机入口、账户展示、手动发票平台登录（模拟 Token）、设置保存、鼠标/键盘调宽、请求详情/解密/复制（模拟服务）、下拉菜单及消息隔离、窄屏适配、无主系统 Vue 时的 document-start 启动。
 - 模拟主系统验证不替代真实电局账户登录验收。
+
+## 入口与更新排查（1.2.2）
+
+本版修复内置依赖在严格 CSP 和油猴全局对象差异下尝试 `Function("return this")()` 的启动异常。构建只将 lodash-es 的 `_root.js` 替换为 `globalThis`，不放宽主系统 CSP，也不改写主系统 Vue。发布检查禁止产物出现动态 Function/eval。
+
+纸飞机宿主位于 documentElement，主页面重绘 body 不会删除入口；宿主被直接移除时复用现有实例恢复，不重新安装请求监听。
+
+脚本头显式声明固定 updateURL 和 downloadURL。旧安装如果没有有效更新地址，需要从 README 安装链接覆盖更新一次；不要先删除脚本，以免丢失配置。安装后刷新税局页面，并确认油猴中的版本为 1.2.2。如果仍未出现，检查当前域名是否命中脚本规则、脚本是否启用，以及控制台首条脚本错误。

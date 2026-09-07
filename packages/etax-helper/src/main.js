@@ -17,7 +17,24 @@ function mount() {
   style.textContent = elementCss.replaceAll(':root', ':host') + helperCss;
   shadow.append(style);
   const container = document.createElement('div'), overlay = document.createElement('div');
-  shadow.append(container, overlay); document.body.append(host);
+  shadow.append(container, overlay);
+  // Keep the launcher outside a body that a portal bootstrap may replace.
+  let observedRoot;
+  const rootObserver = new MutationObserver(ensureHost);
+  function ensureHost() {
+    const root = document.documentElement;
+    if (!root) return;
+    if (root !== observedRoot) {
+      rootObserver.disconnect();
+      rootObserver.observe(root, {childList: true});
+      observedRoot = root;
+    }
+    if (host.parentNode !== root) root.append(host);
+  }
+  ensureHost();
+  // Observe only root replacement/direct children, never the whole page subtree.
+  const documentObserver = new MutationObserver(ensureHost);
+  documentObserver.observe(document, {childList: true});
   setNoticeContainer(overlay);
   const records = shallowRef([]), paused = ref(false);
   collector.subscribe(value => {records.value = value;});
