@@ -1,13 +1,13 @@
 <template>
-  <section class="workspace">
+  <section class="workspace account-workspace">
     <template v-if="!manual">
-      <div class="toolbar"><ElInput v-model="search" clearable placeholder="搜索税号、企业名称、Cookie ID" :prefix-icon="Search"/><ElButton :icon="Refresh" :loading="loading" aria-label="刷新账户" @click="refresh"/><ElButton type="primary" @click="manual=true">手动登录</ElButton></div>
-      <div v-if="!config.apiKey" class="empty-state"><span class="empty-icon"><User/></span><h3>连接你的账户</h3><p>配置 API Key 后查看账户，或直接使用手动登录。</p><ElButton type="primary" plain @click="emit('settings')">去配置</ElButton></div>
+      <div class="toolbar"><ElInput v-model="search" clearable placeholder="搜索税号、企业名称、Cookie ID" :prefix-icon="Search"/><ElButton :icon="Refresh" :loading="loading" aria-label="刷新账户" @click="refresh"/><ElButton @click="manual=true">手动登录</ElButton></div>
+      <div v-if="!config.apiKey" class="empty-state"><span class="empty-icon"><User/></span><h3>连接你的账户</h3><p>配置 API Key 后查看账户，或直接使用手动登录。</p><ElButton type="primary" @click="emit('settings')">配置账户服务</ElButton></div>
       <template v-else>
         <ElAlert v-if="error" :title="error" type="error" :closable="false"/>
         <ElTable :data="filtered" height="100%" class="data-table" empty-text="暂无匹配账户" size="small">
-          <ElTableColumn prop="company" label="企业名称" min-width="180"/>
-          <ElTableColumn prop="taxNo" label="税号" min-width="170"/>
+          <ElTableColumn class-name="account-company" prop="company" label="企业名称" min-width="180"/>
+          <ElTableColumn class-name="account-tax" prop="taxNo" label="税号" min-width="170"/>
           <ElTableColumn prop="user" label="用户" min-width="90"/>
           <ElTableColumn label="状态" width="90"><template #default="{row}"><span class="neutral-status">{{row.statusText}}</span></template></ElTableColumn>
         </ElTable>
@@ -17,7 +17,7 @@
       <div class="subheading"><button class="back-button" @click="manual=false;reset()"><ArrowLeft/>返回账户</button></div>
       <div class="form-page"><div class="page-heading"><h2>手动登录</h2><p>选择业务平台，填写对应的登录凭据。</p></div>
       <ElForm label-position="top" @submit.prevent="login">
-        <ElFormItem label="业务平台"><ElRadioGroup v-model="form.platform"><ElRadioButton v-for="item in platforms" :key="item.value" :label="item.value">{{item.label}}</ElRadioButton></ElRadioGroup></ElFormItem>
+        <ElFormItem label="业务平台"><ElRadioGroup v-model="form.platform" class="platform-switch"><ElRadioButton v-for="item in platforms" :key="item.value" :label="item.value">{{item.label}}</ElRadioButton></ElRadioGroup></ElFormItem>
         <template v-if="form.platform==='dppt'"><ElFormItem label="CheckToken"><ElInput v-model="form.checkToken" type="password" show-password clearable autocomplete="off" placeholder="输入 CheckToken"/></ElFormItem><ElFormItem label="DzfpToken"><ElInput v-model="form.dzfpToken" type="password" show-password clearable autocomplete="off" placeholder="输入 DzfpToken"/></ElFormItem></template>
         <ElFormItem v-else label="TpassToken"><ElInput v-model="form.tpassToken" type="password" show-password clearable autocomplete="off" placeholder="输入 TpassToken"/></ElFormItem>
         <p v-if="['zhcx','ckts'].includes(form.platform)" class="hint">登录后，请在电局统一入口进入对应业务。</p>

@@ -10,7 +10,7 @@
       </header>
       <nav v-if="!settings" class="nav-tabs" aria-label="功能导航"><button v-for="item in tabs" :key="item.value" :class="{active:tab===item.value}" :aria-current="tab===item.value ? 'page' : undefined" @click="changeTab(item.value)">{{item.label}}</button></nav>
       <div class="panel-content"><Config v-if="settings" @back="settings=false"/><Account v-else-if="tab==='account'" @settings="settings=true"/><Network v-else/></div>
-      <footer class="panel-footer"><span>{{region ? `当前地区 · ${region}` : '当前页面'}}</span><span class="capture-state"><i :class="{paused:paused || runtime.xhr!=='ready' || runtime.fetch!=='ready'}"/>{{paused ? '采集已暂停' : captureLabel}}<span class="count">{{records.length}} / 50</span></span></footer>
+      <footer class="panel-footer"><span>{{region ? `当前地区 · ${getRegionLabel(region)}` : '当前页面'}}</span><span class="capture-state"><i :class="{paused:paused || runtime.xhr!=='ready' || runtime.fetch!=='ready'}"/>{{paused ? '采集已暂停' : captureLabel}}<span class="count">{{records.length}} / 50</span></span></footer>
     </aside>
   </template>
 </template>
@@ -23,7 +23,7 @@ import Config from './components/Config.vue';
 import { config, saveConfig } from './stores/config';
 import { showError } from './utils/notice';
 import { runtime, captureLabel } from './stores/runtime';
-import { getRegion } from './config/platforms';
+import { getRegion, getRegionLabel } from './config/platforms';
 const version=__ETAX_VERSION__, region=getRegion(location.href), records=inject('records'), paused=inject('paused');
 const visible=ref(false), settings=ref(false), launcher=ref(), panel=ref(), width=ref(Number(config.width)||720);
 const tabs=[{value:'account',label:'账户'},{value:'network',label:'请求'}];
