@@ -27,7 +27,8 @@ function retryNetwork() {
   } catch { fail('xhr', 'NETWORK_INIT_FAILED'); fail('fetch', 'NETWORK_INIT_FAILED'); }
 }
 const collector = {
-  clear: () => network?.clear(), getToken: record => network?.getToken(record) || '',
+  clear: () => network?.clear(), clearAll: () => network?.clear({includePinned: true}),
+  togglePin: id => network?.togglePin(id), getToken: record => network?.getToken(record) || '',
   setPaused: value => network?.setPaused(value),
 };
 // Each module catches its own failures; recording still starts at document-start.

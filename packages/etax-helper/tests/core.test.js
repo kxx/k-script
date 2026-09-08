@@ -132,3 +132,32 @@ test('unavailable transports can be installed later; throwing XHR getter does no
  const empty={};const later=installNetwork(empty);assert.equal(later.getStatus().xhr,'unavailable');
  empty.XMLHttpRequest=class extends FakeXHR {};later.retry();assert.equal(later.getStatus().xhr,'ready');later.uninstall();
 });
+
+test('pinning retains tokens within the 50-record cap; clear preserves pins and discards in-flight requests',()=>{
+ const s=setup();const add=url=>{const x=new s.target.XMLHttpRequest();x.open('GET',url);x.send();x.complete();return s.records()[0];};
+ const first=add('/keep');s.api.togglePin(first.id);
+ for(let i=0;i<70;i++)add('/'+i);
+ assert.equal(s.records().length,50);const pinned=s.records().find(r=>r.id===first.id);assert(pinned.pinned);assert.equal(s.api.getToken(pinned),'original-token');
+ const pending=new s.target.XMLHttpRequest();pending.open('GET','/pending');pending.send();s.api.clear();pending.complete();
+ assert.equal(s.records().length,1);assert.equal(s.records()[0].id,first.id);
+ s.api.togglePin(first.id);assert.equal(s.records()[0].pinned,false);s.api.clear({includePinned:true});assert.equal(s.records().length,0);
+ assert.throws(()=>s.api.togglePin(first.id),/移出/);
+});
+test('pin cap allows new records and prevents unbounded retained data',()=>{
+ const s=setup();for(let i=0;i<11;i++){const x=new s.target.XMLHttpRequest();x.open('GET','/'+i);x.send();x.complete();}
+ const ids=s.records().map(r=>r.id);ids.slice(0,10).forEach(id=>s.api.togglePin(id));assert.throws(()=>s.api.togglePin(ids[10]),/上限/);
+ s.api.togglePin(ids[0]);s.api.togglePin(ids[10]);assert.equal(s.records().filter(r=>r.pinned).length,10);
+ s.api.clear({includePinned:true});assert.equal(s.records().length,0);
+});
+test('capture states distinguish truncated, full and unsupported request/response bodies',()=>{
+ const s=setup({location:{href:'https://example.test/base/'}});
+ const x=new s.target.XMLHttpRequest();x.open('POST','child');x.send('x'.repeat(40));x.complete({response:'y'.repeat(40)});
+ const r=s.records()[0];assert.equal(r.absoluteUrl,'https://example.test/base/child');assert.equal(r.requestBodyState,'truncated');assert.equal(r.responseBodyState,'truncated');
+ x.open('POST','/file');x.send(new FormData());x.complete({responseType:'blob'});assert.equal(s.records()[0].requestBodyState,'unavailable');assert.equal(s.records()[0].responseBodyState,'unavailable');
+ x.open('POST','/full');x.send(new URLSearchParams('a=b'));x.complete();assert.equal(s.records()[0].requestBodyState,'complete');assert.equal(s.records()[0].responseBodyState,'complete');
+});
+test('fetch bound is reported as a limit without claiming known truncation; Request bodies stay unread',async()=>{
+ const response=new Response('x'.repeat(32),{headers:{'content-type':'text/plain'}});const s=setup({fetch:()=>Promise.resolve(response)});
+ const input=new Request('https://example.test/',{method:'POST',body:'original'});await s.target.fetch(input);
+ await new Promise(resolve=>setTimeout(resolve,20));assert.equal(s.records()[0].responseBodyState,'limit');assert.equal(s.records()[0].requestBodyState,'unavailable');assert.equal(await input.text(),'original');assert.equal(await response.text(),'x'.repeat(32));
+});
