@@ -6,6 +6,7 @@ test('account normalization preserves current/legacy field contracts and search'
  const rows=normalizeAccounts({workspaces:[{name:'TAX-1',name2:'甲企业',name3:'用户',cookieId:'ID-A'},{nsrsbh:'NEW',name:'old',nsrmc:'乙企业',username:'new user',status:'有效'}]});
  assert.equal(rows[0].statusText,'未校验');assert.equal(rows[1].taxNo,'NEW');
  assert.equal(filterAccounts(rows,' id-a ')[0],rows[0]);assert.equal(filterAccounts(rows,'乙')[0],rows[1]);assert.equal(filterAccounts(rows,'tax-1')[0],rows[0]);
+ assert.equal(filterAccounts(rows,'甲 tax-1 ID-A')[0],rows[0]);assert.equal(filterAccounts(rows,'乙 tax-1').length,0);
  assert.throws(()=>normalizeAccounts({workspaces:[null]}));assert.throws(()=>normalizeAccounts({}));
 });
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};

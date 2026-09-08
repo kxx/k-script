@@ -7,8 +7,8 @@ export function normalizeAccounts(data) {
   }));
 }
 export function filterAccounts(rows, query) {
-  const search = query.trim().toLowerCase();
-  return rows.filter(row => [row.taxNo, row.company, row.cookieId].some(value => String(value ?? '').toLowerCase().includes(search)));
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return rows.filter(row => terms.every(term => [row.taxNo, row.company, row.cookieId].some(value => String(value ?? '').toLowerCase().includes(term))));
 }
 export function createAccountQuery({state, load, getContext}) {
   let revision = 0, disposed = false;

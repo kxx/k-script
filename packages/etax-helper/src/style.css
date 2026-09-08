@@ -35,3 +35,5 @@
 @media(max-width:480px){.request-views{gap:6px;flex-wrap:wrap}.pin-filter{padding:6px 3px}.detail-actions{gap:5px}.group-heading{max-height:90px;overflow:auto}}
 
 .release-info{margin-top:28px;border-top:1px solid var(--el-border-color)}.release-info .setting-row{border:0;padding-bottom:12px}.release-links{display:flex;flex-wrap:wrap;gap:12px 20px}.release-links a{color:var(--el-color-primary);font-size:13px;text-decoration:none}.release-links a:hover{text-decoration:underline}.release-links a:focus-visible{outline:2px solid var(--el-color-primary);outline-offset:4px}
+
+.pin-button:disabled{opacity:.35;cursor:not-allowed}.account-details{display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;font-size:13px}.account-details dt{color:#667085}.account-details dd{margin:0;overflow-wrap:anywhere;color:#344054}

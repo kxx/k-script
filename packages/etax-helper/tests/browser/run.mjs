@@ -27,9 +27,9 @@ try {
     },{once:true});
     ((GM_getValue,GM_setValue,GM_openInTab,GM_xmlhttpRequest,GM_setClipboard,GM_info,unsafeWindow,self,global)=>{
       ${bundle}
-    })((key,fallback)=>{if(fixture.readFailed)throw Error('PRIVATE_TOKEN in https://secret.invalid/?token=PRIVATE_TOKEN');return fixture.saved;},
-      (key,value)=>{fixture.writes++;fixture.saved=value;},()=>{},
-      options=>options.onload({status:200,responseText:'{"code":0,"data":{"workspaces":[]}}'}),
+    })((key,fallback)=>{if(fixture.readFailed)throw Error('PRIVATE_TOKEN in https://secret.invalid/?token=PRIVATE_TOKEN');return key==='etax_helper_account_preferences' ? (fixture.preferences ?? fallback) : fixture.saved;},
+      (key,value)=>{if(key==='etax_helper_account_preferences')fixture.preferences=value;else {fixture.writes++;fixture.saved=value;}},()=>{},
+      options=>options.onload({status:200,responseText:JSON.stringify({code:0,data:{workspaces:[{cookieId:'ID-A',nsrsbh:'TAX-A',nsrmc:'Alpha Company'},{cookieId:'ID-B',nsrsbh:'TAX-B',nsrmc:'Beta Company'},{nsrmc:'No ID'}]}})}),
       text=>fixture.copied=text,{scriptHandler:'Tampermonkey',version:'5.4.1'},window,{Object:function SandboxObject(){}},undefined);
     fixture.globalsUntouched=()=>Vue===originalVue&&ELEMENT===originalElement&&window.GM_getValue===undefined;
   `;
@@ -48,6 +48,35 @@ try {
   const launcher=page.getByRole('button',{name:'打开 ETax 助手',exact:true});await launcher.click();
   assert(await page.evaluate(()=>fixture.globalsUntouched()));
   assert.deepEqual(await page.evaluate(()=>fixture.hostStyle()),await page.evaluate(()=>fixture.before));
+  if(failure==='none') {
+    const search=page.getByPlaceholder('搜索税号、企业名称、Cookie ID（空格组合）');
+    await search.fill('Alpha TAX-A');
+    const star=page.getByRole('button',{name:'收藏账户',exact:true});await star.waitFor();
+    await page.waitForFunction(()=>!document.getElementById('etax-helper').shadowRoot.querySelector('button[aria-label="收藏账户"]').disabled);
+    await star.click();await page.getByRole('button',{name:'查看',exact:true}).click();
+    await page.getByText('账户信息',{exact:true}).waitFor();
+    await page.getByRole('button',{name:'返回账户',exact:true}).click();
+    await page.getByRole('button',{name:'请求',exact:true}).click();await page.getByRole('button',{name:'账户',exact:true}).click();
+    assert.equal(await search.inputValue(),'Alpha TAX-A');
+    await page.getByRole('button',{name:'取消收藏账户',exact:true}).waitFor();
+    await page.getByRole('button',{name:'刷新账户',exact:true}).click();
+    await page.getByRole('button',{name:'取消收藏账户',exact:true}).waitFor();
+    await search.fill('');await page.getByRole('button',{name:'我的收藏',exact:true}).click();
+    assert.equal(await page.getByRole('button',{name:'查看',exact:true}).count(),1);
+    await page.getByRole('button',{name:'最近查看',exact:true}).click();
+    assert.equal(await page.getByRole('button',{name:'查看',exact:true}).count(),1);
+    await page.getByRole('button',{name:'清空最近查看',exact:true}).click();
+    assert.equal(await page.getByRole('button',{name:'查看',exact:true}).count(),0);
+    await page.getByRole('button',{name:'我的收藏',exact:true}).click();
+    assert.equal(await page.getByRole('button',{name:'取消收藏账户',exact:true}).count(),1);
+    assert.doesNotMatch(await page.evaluate(()=>JSON.stringify(fixture.preferences)),/PRIVATE_|Alpha|TAX-A/);
+    await page.getByRole('button',{name:'全部账户',exact:true}).click();
+    await page.setViewportSize({width:480,height:800});
+    assert(await page.locator('.panel').evaluate(el=>el.scrollWidth<=el.clientWidth));
+    if(process.env.ETAX_ACCOUNT_SCREENSHOT)await page.screenshot({path:process.env.ETAX_ACCOUNT_SCREENSHOT});
+    await page.setViewportSize({width:1280,height:900});
+    console.log('PASS account preferences: favorites, recent views, clear, refresh and remount search retention');
+  }
   await page.getByRole('button',{name:'设置',exact:true}).click();
   assert.equal(await page.locator('.diagnostics').getAttribute('open'),null);
   if(failure==='none') {
