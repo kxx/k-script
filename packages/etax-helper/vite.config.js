@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import {installUrl} from './src/config/release.js';
 import { readFileSync } from 'node:fs';
 const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 import vue from '@vitejs/plugin-vue';
@@ -29,8 +30,8 @@ export default defineConfig({
       userscript: {
         name: "etax助手",
         version,
-        updateURL: 'https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js',
-        downloadURL: 'https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js',
+        updateURL: installUrl,
+        downloadURL: installUrl,
         'run-at': 'document-start',
         // Explicit grants accompany the direct userscript-scope API adapter.
         grant: ['GM_getValue', 'GM_setValue', 'GM_openInTab', 'GM_xmlhttpRequest', 'GM_setClipboard', 'unsafeWindow'],

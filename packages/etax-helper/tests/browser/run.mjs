@@ -33,8 +33,10 @@ try {
       text=>fixture.copied=text,{scriptHandler:'Tampermonkey',version:'5.4.1'},window,{Object:function SandboxObject(){}},undefined);
     fixture.globalsUntouched=()=>Vue===originalVue&&ELEMENT===originalElement&&window.GM_getValue===undefined;
   `;
-  await page.route('**/*',route=>{
-    const path=new URL(route.request().url()).pathname;
+  await page.context().route('**/*',route=>{
+    const address=new URL(route.request().url());
+    if(address.hostname!=='etax.jiangsu.chinatax.gov.cn')return route.fulfill({contentType:'text/plain',body:'External installation / release page fixture'});
+    const path=address.pathname;
     if(path==='/fixture.js')return route.fulfill({contentType:'application/javascript; charset=utf-8',body:boot});
     if(path==='/host.css')return route.fulfill({contentType:'text/css',body:css});
     if(path==='/large')return route.fulfill({contentType:'text/plain',body:'x'.repeat(70000)});
@@ -48,6 +50,23 @@ try {
   assert.deepEqual(await page.evaluate(()=>fixture.hostStyle()),await page.evaluate(()=>fixture.before));
   await page.getByRole('button',{name:'设置',exact:true}).click();
   assert.equal(await page.locator('.diagnostics').getAttribute('open'),null);
+  if(failure==='none') {
+    const writes=await page.evaluate(()=>fixture.writes);
+    const links=[['检查更新','https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js'],['更新说明','https://github.com/kxx/k-script/blob/main/packages/etax-helper/CHANGELOG.md'],['历史版本','https://github.com/kxx/k-script/releases?q=etax-helper-v']];
+    for(const [name,url] of links){
+      const link=page.getByRole('link',{name,exact:true});
+      assert.equal(await link.getAttribute('href'),url);assert.equal(await link.getAttribute('rel'),'noopener noreferrer');
+      const popupPromise=page.waitForEvent('popup');await link.click();const popup=await popupPromise;await popup.waitForLoadState();
+      assert.equal(popup.url(),url);assert.equal(await popup.evaluate(()=>window.opener),null);await popup.close();
+    }
+    assert.equal(await page.evaluate(()=>fixture.writes),writes);
+    await page.setViewportSize({width:480,height:800});
+    await page.locator('.release-info').scrollIntoViewIfNeeded();
+    assert(await page.locator('.form-page').evaluate(el=>el.scrollWidth<=el.clientWidth));
+    if(process.env.ETAX_SETTINGS_SCREENSHOT)await page.screenshot({path:process.env.ETAX_SETTINGS_SCREENSHOT});
+    await page.setViewportSize({width:1280,height:900});
+    console.log('PASS update links: installation handoff, isolated new tabs, no config writes and narrow layout');
+  }
   await page.getByText('运行诊断',{exact:true}).click();
   const diagnosticValue=label=>page.locator('.diagnostics dt').filter({hasText:label}).locator('xpath=following-sibling::dd[1]');
   assert.equal(await diagnosticValue('XHR').innerText(),['xhr','both'].includes(failure)?'失败':'正常');

@@ -1,14 +1,15 @@
 {
   "name": "etax-helper",
   "private": true,
-  "version": "1.2.8",
+  "version": "1.2.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/check-userscript.mjs",
     "preview": "vite preview",
     "test": "node --test tests/*.test.js",
-    "test:browser": "node tests/browser/run.mjs"
+    "test:browser": "node tests/browser/run.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "2.3.2",

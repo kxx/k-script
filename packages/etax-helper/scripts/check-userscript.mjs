@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {installUrl} from '../src/config/release.js';
+import {releaseNotes} from './release-utils.mjs';
 import { Script } from 'node:vm';
 import {readFileSync} from 'node:fs';
 const {version}=JSON.parse(readFileSync(new URL('../package.json', import.meta.url),'utf8'));
@@ -8,7 +10,9 @@ assert.match(metadata,new RegExp(`@version\\s+${version.replaceAll('.', '\\.')}\
 assert.doesNotMatch(metadata,/@require\s/,'Dependencies must stay bundled, without a CDN bridge.');
 assert.doesNotMatch(bundle,/\b(?:new\s+)?Function\s*\(/,'A Function constructor can prevent startup under CSP in a userscript sandbox.');
 assert.doesNotMatch(bundle,/\beval\s*\(/,'The userscript must not require unsafe-eval.');
-const url='https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js';
+const url=installUrl;
+releaseNotes(readFileSync(new URL('../CHANGELOG.md',import.meta.url),'utf8'),version);
+assert.ok(readFileSync(new URL('../README.md',import.meta.url),'utf8').includes(`当前版本 **${version}**`), 'README version must match package.json');
 for(const key of ['updateURL','downloadURL']) assert.equal(metadata.match(new RegExp(`@${key}\\s+(\\S+)`))?.[1],url);
 console.log('Userscript checks passed: version, fixed update URLs, no CDN or dynamic code evaluation.');
 

@@ -1,6 +1,6 @@
 # ETax 助手
 
-基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.8**。
+基于 Vue 3、Element Plus 和 vite-plugin-monkey 的浏览器用户脚本。当前版本 **1.2.9**。
 
 [安装或更新脚本](https://raw.githubusercontent.com/kxx/k-script/main/packages/etax-helper/dist/etax-helper.user.js)
 
@@ -141,3 +141,27 @@ Node 版本约束适用于开发/CI，不要求安装脚本的用户安装 Node�
 - **完整性提示**：列表标记内容不完整，详情按请求体/响应分别提示。XHR 和字符串请求体超限时标记“已截断”；Fetch 读取达到 64 KiB 后不继续读取，标记“达到采集上限，可能不完整”；文件、流式响应等显示“未完整读取”。保留原始请求返回值、Promise 和响应体。
 
 本轮回退基线：[已验收的 1.2.7](https://github.com/kxx/k-script/tree/6f4667bd4c5da4b81dc4ea3f715e8146fcede3de/packages/etax-helper)。下一阶段单独完善发布流程。
+
+
+## 正式发布与回退
+
+版本号仍以本包 `package.json` 为唯一来源。准备下一版时，将本次说明写入临时 Markdown 文件（正文使用条目，不写版本标题），然后在仓库根目录执行：
+
+```bash
+pnpm --filter etax-helper release:prepare 1.2.10 /absolute/path/release-notes.md
+pnpm etax-helper:build
+pnpm etax-helper:test
+pnpm --filter etax-helper test:browser
+```
+
+准备命令同步 package.json、README 版本和 CHANGELOG 最新条目，拒绝相同/降低的版本号及空说明。构建会检查版本、更新地址、脚本权限及更新说明一致性。提交时包含源码、文档与构建后的 `dist/etax-helper.user.js`。
+
+- main 推送先运行 Node 22/24 测试、构建一致性和浏览器回归。仅当本次推送前后的版本号增加，才自动发布 `etax-helper-v版本号`；普通提交只检查。
+- 发布先创建固定提交的标签和草稿，再上传 `etax-helper.user.js`、`SHA256SUMS.txt` 并核对 SHA-256，全部成功才公开。已公开版本不覆盖，标签不移动。失败时可重跑工作流，未公开草稿可续传。
+- Actions 的 **ETax Helper checks → Run workflow → main** 支持手动补发，仍先跑全部检查；同版本标签对应其他提交时会拒绝，需准备新版本。发布任务需要仓库允许 `GITHUB_TOKEN` 的 contents 写权限。
+- [历史正式版本](https://github.com/kxx/k-script/releases?q=etax-helper-v) 从 1.2.9 开始留存；此前版本可从相应历史提交的 dist 安装，不能假定都兼容当前配置。仓库内其他脚本使用自己的版本，不共用 ETax 发布标签或 Latest 标记。
+- 设置页提供检查更新、更新说明及历史版本入口。检查更新只是打开安装页，由油猴比较版本并确认安装；不会自动执行下载内容，也不向 GitHub 发送 API Key、Cookie 或请求记录。
+
+**现有 main 安装/更新地址保持不变**：它在提交后立即变化，并不是等 CI 通过才可更新的稳定频道。正式版本附件在全部检查通过后才发布，版本标签和附件便于复现与回退。
+
+回退前用脚本管理器导出并妥善保存配置备份，暂停该脚本自动更新，再从历史版本附件安装；脚本管理器可能要求确认降级。回退脚本不等于回退配置。若旧版提示高版本配置不兼容，应恢复新版，不要重置或删除配置；更早的版本可能没有高版本写入保护。问题解决后安装新版并恢复自动更新。

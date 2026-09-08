@@ -1,0 +1,18 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {assertNewVersion,releaseNotes} from './release-utils.mjs';
+const [version,notesFile,...extra]=process.argv.slice(2);
+if (!version || !notesFile || extra.length) throw Error('Usage: pnpm --filter etax-helper release:prepare <x.y.z> <notes-file>');
+const root=new URL('../',import.meta.url);
+const pkg=JSON.parse(readFileSync(new URL('package.json',root),'utf8'));
+assertNewVersion(pkg.version,version);
+const notes=readFileSync(notesFile,'utf8').trim();
+const oldLog=readFileSync(new URL('CHANGELOG.md',root),'utf8');
+const changelog=oldLog.replace('# 更新日志','# 更新日志\n\n## '+version+'\n\n'+notes);
+releaseNotes(changelog,version);
+const oldReadme=readFileSync(new URL('README.md',root),'utf8');
+const marker=`当前版本 **${pkg.version}**`;
+if(!oldReadme.includes(marker))throw Error('README version is out of sync');
+const readme=oldReadme.replace(marker,`当前版本 **${version}**`);
+pkg.version=version;
+for(const [name,data] of [['package.json',JSON.stringify(pkg,null,2)+'\n'],['CHANGELOG.md',changelog],['README.md',readme]])writeFileSync(new URL(name,root),data);
+console.log(`Prepared ${version}. Run tests and build, then commit sources and dist together.`);
